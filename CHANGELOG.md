@@ -1,7 +1,9 @@
 ## [3.2.1] - 2025-30-07
 ### Changed
-- Fixed layout at Android 15+
 - Updated native Android SDK to 3.0.1
+
+### Fixed:
+- Layout at Android 15+
 
 ## [3.2.1] - 2025-24-03
 ### Changed
