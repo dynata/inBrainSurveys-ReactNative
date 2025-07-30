@@ -1,3 +1,8 @@
+## [3.2.1] - 2025-30-07
+### Changed
+- Fixed layout at Android 15+
+- Updated native Android SDK to 3.0.1
+
 ## [3.2.1] - 2025-24-03
 ### Changed
 - Default option for `showSurveys()` method set to `false`
