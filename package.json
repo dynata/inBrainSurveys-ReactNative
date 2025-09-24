@@ -16,8 +16,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/inbrainai/sdk-react",
-    "baseUrl": "https://github.com/inbrainai/sdk-react"
+    "url": "https://github.com/dynata/inBrainSurveys-ReactNative",
+    "baseUrl": "https://github.com/dynata/inBrainSurveys-ReactNative"
   },
   "keywords": [
     "react-native",
