@@ -19,8 +19,10 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.inbrain.sdk.InBrain;
 
 import com.inbrain.sdk.callback.GetNativeSurveysCallback;
+import com.inbrain.sdk.callback.GetNativeOffersCallback;
 import com.inbrain.sdk.callback.GetRewardsCallback;
 import com.inbrain.sdk.callback.InBrainCallback;
+import com.inbrain.sdk.callback.OpenOfferCallback;
 import com.inbrain.sdk.callback.StartSurveysCallback;
 import com.inbrain.sdk.callback.SurveysAvailableCallback;
 import com.inbrain.sdk.callback.GetCurrencySaleCallback;
@@ -35,10 +37,18 @@ import com.inbrain.sdk.model.SurveyFilter;
 import com.inbrain.sdk.model.InBrainSurveyReward;
 import com.inbrain.sdk.model.CurrencySale;
 import com.inbrain.sdk.model.WallOption;
+import com.inbrain.sdk.model.offers.InBrainNativeOffer;
+import com.inbrain.sdk.model.offers.InBrainOfferFilter;
+import com.inbrain.sdk.model.offers.InBrainOfferType;
+import com.inbrain.sdk.model.offers.InBrainOfferGoal;
+import com.inbrain.sdk.model.offers.InBrainOfferPromotion;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import javax.annotation.Nullable;
 
@@ -47,10 +57,14 @@ import static android.graphics.Color.parseColor;
 public class InBrainSurveysModule extends ReactContextBaseJavaModule implements InBrainCallback {
 
     private final ReactApplicationContext reactContext;
+    private final SimpleDateFormat dateFormatter;
 
     public InBrainSurveysModule(ReactApplicationContext reactContext) {
         super(reactContext);
+
         this.reactContext = reactContext;
+        this.dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
+        this.dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     @Override
@@ -251,6 +265,120 @@ public class InBrainSurveysModule extends ReactContextBaseJavaModule implements 
         });
     }
 
+    // *******************************
+    // ***** GET NATIVE OFFERS *******
+    // *******************************
+    @ReactMethod
+    public void getNativeOffers(final ReadableMap filterMap, final Promise promise) {
+        InBrainOfferFilter filter = null;
+        
+        if (filterMap != null) {
+            Integer type = filterMap.hasKey("type") ? filterMap.getInt("type") : null;
+            Integer limit = filterMap.hasKey("limit") ? filterMap.getInt("limit") : null;
+            Integer offset = filterMap.hasKey("offset") ? filterMap.getInt("offset") : null;
+            
+            if (type != null) {
+                InBrainOfferType offerType = getOfferTypeFromRaw(type);
+                int limitValue = limit != null ? limit : 10;
+                int offsetValue = offset != null ? offset : 0;
+                filter = new InBrainOfferFilter(offerType, limitValue, offsetValue);
+            }
+        }
+        
+        InBrain.getInstance().getNativeOffers(filter, new GetNativeOffersCallback() {
+            @Override
+            public void onSuccess(List<InBrainNativeOffer> offers) {
+                WritableArray array = Arguments.createArray();
+                
+                for (InBrainNativeOffer offer : offers) {
+                    WritableMap map = Arguments.createMap();
+                    
+                    map.putInt("id", offer.getId());
+                    map.putString("title", offer.getTitle());
+                    map.putDouble("reward", offer.getReward());
+                    map.putString("rewardString", offer.getRewardString());
+                    map.putInt("featuredRank", offer.getFeaturedRank());
+                    
+                    if (offer.getThumbnailUrl() != null) {
+                        map.putString("thumbnailUrl", offer.getThumbnailUrl());
+                    }
+                    if (offer.getHeroImageUrl() != null) {
+                        map.putString("heroImageUrl", offer.getHeroImageUrl());
+                    }
+                    if (offer.getDescription() != null && !offer.getDescription().isEmpty()) {
+                        WritableArray descArray = Arguments.createArray();
+                        for (String desc : offer.getDescription()) {
+                            descArray.pushString(desc);
+                        }
+                        map.putArray("offerDescription", descArray);
+                    }
+                    if (offer.getCategories() != null && !offer.getCategories().isEmpty()) {
+                        WritableArray catArray = Arguments.createArray();
+                        for (String cat : offer.getCategories()) {
+                            catArray.pushString(cat);
+                        }
+                        map.putArray("categories", catArray);
+                    }
+                    
+                    if (offer.getPromotion() != null) {
+                        map.putMap("promotion", mapPromotion(offer.getPromotion()));
+                    }
+                    
+                    if (offer.getStandardGoals() != null && !offer.getStandardGoals().isEmpty()) {
+                        WritableArray goalsArray = Arguments.createArray();
+                        for (InBrainOfferGoal goal : offer.getStandardGoals()) {
+                            goalsArray.pushMap(mapGoal(goal));
+                        }
+                        map.putArray("standardGoals", goalsArray);
+                    }
+                    
+                    if (offer.getPurchaseGoals() != null && !offer.getPurchaseGoals().isEmpty()) {
+                        WritableArray goalsArray = Arguments.createArray();
+                        for (InBrainOfferGoal goal : offer.getPurchaseGoals()) {
+                            goalsArray.pushMap(mapGoal(goal));
+                        }
+                        map.putArray("purchaseGoals", goalsArray);
+                    }
+                    
+                    array.pushMap(map);
+                }
+                
+                promise.resolve(array);
+            }
+            
+            @Override
+            public void onFailure(Throwable error) {
+                promise.reject("ERR_GET_NATIVE_OFFERS", error.getMessage(), error);
+            }
+        });
+    }
+
+    // *******************************
+    // ***** OPEN OFFER WITH *********
+    // *******************************
+    @ReactMethod
+    public void openOfferWith(final int offerId, final Promise promise) {
+        final OpenOfferCallback callback = new OpenOfferCallback() {
+            @Override
+            public void onSuccess() {
+                promise.resolve(null);
+            }
+            
+            @Override
+            public void onFailure(Throwable error) {
+                promise.reject("ERR_OPEN_OFFER", error.getMessage(), error);
+            }
+        };
+        
+        UiThreadUtil.runOnUiThread(() -> {
+            try {
+                InBrain.getInstance().openOfferWithId(offerId, getCurrentActivityOrThrow(), callback);
+            } catch (NullCurrentActivityException e) {
+                promise.reject("ERR_NULL_CURRENT_ACTIVITY", e.getMessage(), e);
+            }
+        });
+    }
+
     // ************************************
     // ***** SET NAVIGATION BAR CONFIG *****
     // *************************************
@@ -323,8 +451,8 @@ public class InBrainSurveysModule extends ReactContextBaseJavaModule implements 
                 WritableMap currencySaleForJS = Arguments.createMap();
                 currencySaleForJS.putString("title", currencySale.description);
                 currencySaleForJS.putDouble("multiplier", currencySale.multiplier);
-                currencySaleForJS.putString("startOn", currencySale.startOn);
-                currencySaleForJS.putString("endOn", currencySale.endOn);
+                currencySaleForJS.putString("startOn", formatCurrencySaleDate(currencySale.startOn));
+                currencySaleForJS.putString("endOn", formatCurrencySaleDate(currencySale.endOn));
                 promise.resolve(currencySaleForJS);
             }
         });
@@ -389,6 +517,72 @@ public class InBrainSurveysModule extends ReactContextBaseJavaModule implements 
     // ***************************
     // ***** UTILITY METHODS *****
     // ***************************
+    
+    /**
+     * Format currency sale date string to include timezone.
+     * Android SDK returns dates in UTC without timezone indicator (e.g., "2024-01-01T12:00:00"),
+     * we append "Z" to indicate UTC for proper JavaScript Date parsing.
+     */
+    private String formatCurrencySaleDate(String dateString) {
+        // Android SDK currency sale dates are always in UTC, just append the timezone indicator
+        if (dateString != null && !dateString.isEmpty() && !dateString.endsWith("Z")) {
+            return dateString + "Z";
+        }
+        return dateString;
+    }
+    
+    /**
+     * Convert raw integer to InBrainOfferType enum
+     */
+    private InBrainOfferType getOfferTypeFromRaw(int raw) {
+        switch (raw) {
+            case 0:
+                return InBrainOfferType.DEFAULT;
+            case 1:
+                return InBrainOfferType.FEATURED;
+            case 2:
+                return InBrainOfferType.STARTED;
+            default:
+                return InBrainOfferType.DEFAULT;
+        }
+    }
+    
+    /**
+     * Map InBrainOfferGoal to WritableMap for React Native
+     */
+    private WritableMap mapGoal(InBrainOfferGoal goal) {
+        WritableMap goalMap = Arguments.createMap();
+        goalMap.putInt("id", goal.getId());
+        goalMap.putString("title", goal.getTitle());
+        goalMap.putString("goalDescription", goal.getDescription());
+        goalMap.putDouble("reward", goal.getReward());
+        goalMap.putString("rewardString", goal.getRewardString());
+        goalMap.putBoolean("isCompleted", goal.isCompleted());
+        goalMap.putInt("sortOrder", goal.getSortOrder());
+        goalMap.putInt("attributionWindowMinutes", goal.getAttributionWindowMinutes());
+        
+        if (goal.getCompleteBy() != null) {
+            goalMap.putString("completeBy", dateFormatter.format(goal.getCompleteBy()));
+        }
+        
+        if (goal.getPromotion() != null) {
+            goalMap.putMap("promotion", mapPromotion(goal.getPromotion()));
+        }
+        
+        return goalMap;
+    }
+    
+    /**
+     * Map InBrainOfferPromotion to WritableMap for React Native
+     */
+    private WritableMap mapPromotion(InBrainOfferPromotion promotion) {
+        WritableMap promotionMap = Arguments.createMap();
+        promotionMap.putDouble("multiplier", promotion.getMultiplier());
+        promotionMap.putDouble("originalReward", promotion.getOriginalReward());
+        promotionMap.putString("originalRewardString", promotion.getOriginalRewardString());
+        return promotionMap;
+    }
+    
     private Activity getCurrentActivityOrThrow() throws NullCurrentActivityException {
         Activity activity = getCurrentActivity();
 

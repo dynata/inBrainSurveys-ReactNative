@@ -1,6 +1,7 @@
 import React from 'react';
 import Home from './Home';
 import NativeSurveys from './NativeSurveys';
+import NativeOffers from './NativeOffers';
 
 import {DefaultTheme, NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -8,6 +9,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 type RootStackParamList = {
   Home: undefined;
   NativeSurveys: undefined;
+  NativeOffers: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -42,6 +44,14 @@ const Navigator = () => {
           component={NativeSurveys}
           options={{
             headerTitle: 'Native Surveys',
+            headerBackVisible: true,
+          }}
+        />
+        <Stack.Screen
+          name="NativeOffers"
+          component={NativeOffers}
+          options={{
+            headerTitle: 'Native Offers',
             headerBackVisible: true,
           }}
         />

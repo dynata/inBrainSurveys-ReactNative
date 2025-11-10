@@ -5,7 +5,9 @@
 @implementation InBrainSurveys {
     InBrain* _inbrain;
     bool hasListeners;
+    NSDateFormatter* _dateFormatter;
 }
+
 // ***********************************
 // ***** UTILS methods *****
 // ***********************************
@@ -14,6 +16,11 @@
     self = [super init];
     _inbrain = [InBrain shared];
     [_inbrain setInBrainDelegate: self];
+    
+    _dateFormatter = [[NSDateFormatter alloc] init];
+    [_dateFormatter setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"UTC"]];
+    [_dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"];
+    
     return self;
 }
 
@@ -148,6 +155,90 @@ RCT_EXPORT_METHOD(showNativeSurvey:(NSString*)id searchId:(NSString*)searchId of
     });
 }
 
+// *******************************
+// ***** GET NATIVE OFFERS *******
+// *******************************
+RCT_EXPORT_METHOD(getNativeOffers:(NSDictionary * _Nullable)filterDict
+                  resolve:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    InBrainOfferFilter *filterObj = nil;
+    
+    // Only create filter if filterDict is provided
+    if (filterDict != nil) {
+        NSNumber *type = filterDict[@"type"];
+        NSNumber *limit = filterDict[@"limit"];
+        NSNumber *offset = filterDict[@"offset"];
+        
+        // Type is required for filter creation
+        if (type != nil) {
+            InBrainOfferType offerType = [type intValue];
+            int limitValue = limit ? [limit intValue] : 10;
+            int offsetValue = offset ? [offset intValue] : 0;
+            filterObj = [[InBrainOfferFilter alloc] initWithType:offerType limit:limitValue offset:offsetValue];
+        }
+    }
+
+    [_inbrain getNativeOffersWithFilter:filterObj success:^(NSArray<InBrainNativeOffer *> * offers) {
+        NSMutableArray *offerList = [NSMutableArray array];
+
+        for(int i = 0; i < offers.count; i++) {
+            InBrainNativeOffer *offer = offers[i];
+            
+            NSMutableDictionary *offerDict = [NSMutableDictionary dictionary];
+            offerDict[@"id"] = [NSNumber numberWithInt: offer.id];
+            offerDict[@"title"] = offer.title;
+            offerDict[@"reward"] = [NSNumber numberWithDouble: offer.reward];
+            offerDict[@"rewardString"] = offer.rewardString;
+            offerDict[@"featuredRank"] = [NSNumber numberWithInt: offer.featuredRank];
+            
+            if(offer.thumbnailUrl) offerDict[@"thumbnailUrl"] = offer.thumbnailUrl;
+            if(offer.heroImageUrl) offerDict[@"heroImageUrl"] = offer.heroImageUrl;
+            if(offer.offerDescription) offerDict[@"offerDescription"] = offer.offerDescription;
+            if(offer.categories) offerDict[@"categories"] = offer.categories;
+            
+            if(offer.promotion) {
+                offerDict[@"promotion"] = @{
+                    @"multiplier": [NSNumber numberWithDouble: offer.promotion.multiplier],
+                    @"originalReward": [NSNumber numberWithDouble: offer.promotion.originalReward],
+                    @"originalRewardString": offer.promotion.originalRewardString
+                };
+            }
+            
+            if(offer.standardGoals && offer.standardGoals.count > 0) {
+                NSMutableArray *standardGoalsList = [NSMutableArray array];
+                for(InBrainOfferGoal *goal in offer.standardGoals) {
+                    [standardGoalsList addObject:[self mapGoal:goal]];
+                }
+                offerDict[@"standardGoals"] = standardGoalsList;
+            }
+            
+            if(offer.purchaseGoals && offer.purchaseGoals.count > 0) {
+                NSMutableArray *purchaseGoalsList = [NSMutableArray array];
+                for(InBrainOfferGoal *goal in offer.purchaseGoals) {
+                    [purchaseGoalsList addObject:[self mapGoal:goal]];
+                }
+                offerDict[@"purchaseGoals"] = purchaseGoalsList;
+            }
+            
+            [offerList addObject:offerDict];
+        }
+
+        resolve(offerList);
+    } failed:^(NSError * failed){
+        reject(@"ERR_GET_NATIVE_OFFERS", failed.localizedDescription, failed);
+    }];
+}
+
+// *******************************
+// ***** OPEN OFFER WITH *********
+// *******************************
+RCT_EXPORT_METHOD(openOfferWith:(NSInteger)offerId resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    [_inbrain openOfferWithId:(int)offerId success:^{
+        resolve(@true);
+    } failed:^(NSError * error) {
+        reject(@"ERR_OPEN_OFFER", error.localizedDescription, error);
+    }];
+}
+
 // ***************************
 // ***** CONFIRM REWARDS *****
 // ***************************
@@ -214,15 +305,11 @@ RCT_EXPORT_METHOD(getCurrencySale: (RCTPromiseResolveBlock)resolve rejecter:(RCT
             resolve(nil);
             return;
         }
-        
-        NSDateFormatter *dateFormat=[[NSDateFormatter alloc]init];
-        [dateFormat setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"UTC"]];
-        [dateFormat setDateFormat: @"yyyy-MM-dd'T'HH:mm:ss"];
        
         NSObject* currencySaleForRN = @{ @"title": currencySale.title,
                          @"multiplier": [NSNumber numberWithDouble:currencySale.multiplier],
-                         @"startOn": [dateFormat stringFromDate:currencySale.startOn],
-                         @"endOn": [dateFormat stringFromDate:currencySale.endOn],
+                         @"startOn": [_dateFormatter stringFromDate:currencySale.startOn],
+                         @"endOn": [_dateFormatter stringFromDate:currencySale.endOn],
         };
         resolve(currencySaleForRN);
 
@@ -277,6 +364,35 @@ RCT_EXPORT_METHOD(getCurrencySale: (RCTPromiseResolveBlock)resolve rejecter:(RCT
 // ***************************
 // ***** UTILITY METHODS *****
 // ***************************
+
+/**
+ * Map InBrainOfferGoal to NSDictionary for React Native
+ */
+- (NSDictionary *)mapGoal:(InBrainOfferGoal *)goal {
+    NSMutableDictionary *goalDict = [NSMutableDictionary dictionary];
+    goalDict[@"id"] = [NSNumber numberWithInt: goal.id];
+    goalDict[@"title"] = goal.title;
+    goalDict[@"goalDescription"] = goal.goalDescription;
+    goalDict[@"reward"] = [NSNumber numberWithDouble: goal.reward];
+    goalDict[@"rewardString"] = goal.rewardString;
+    goalDict[@"isCompleted"] = [NSNumber numberWithBool: goal.isCompleted];
+    goalDict[@"sortOrder"] = [NSNumber numberWithInt: goal.sortOrder];
+    goalDict[@"attributionWindowMinutes"] = [NSNumber numberWithInt: goal.attributionWindowMinutes];
+    
+    if(goal.completeBy) {
+        goalDict[@"completeBy"] = [_dateFormatter stringFromDate:goal.completeBy];
+    }
+    
+    if(goal.promotion) {
+        goalDict[@"promotion"] = @{
+            @"multiplier": [NSNumber numberWithDouble: goal.promotion.multiplier],
+            @"originalReward": [NSNumber numberWithDouble: goal.promotion.originalReward],
+            @"originalRewardString": goal.promotion.originalRewardString
+        };
+    }
+    
+    return goalDict;
+}
 
 /**
  * Convert from a hexadecimal color string to UIColor

@@ -8,15 +8,17 @@
     "start": "react-native start",
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "update-sdk": "cd .. && npm run build && npm pack && cd example && npm remove inbrain-surveys && npm install ../inbrain-surveys-*.tgz && cd ios && pod install && cd .."
   },
   "dependencies": {
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.11.0",
-    "react": "18.3.1",
-    "react-native": "0.76.3",
-    "react-native-safe-area-context": "^4.14.0",
-    "react-native-screens": "^3.35.0"
+    "inbrain-surveys": "github:inbrainai/sdk-react",
+    "react": "19.0.0",
+    "react-native": "0.79.6",
+    "react-native-safe-area-context": "^5.2.0",
+    "react-native-screens": "^4.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -30,13 +32,13 @@
     "@react-native/metro-config": "0.76.3",
     "@react-native/typescript-config": "0.76.3",
     "@tsconfig/react-native": "^3.0.0",
-    "@types/react": "^18.2.6",
-    "@types/react-test-renderer": "^18.0.0",
+    "@types/react-native": "^0.73.0",
+    "@types/react-test-renderer": "19.0.0",
     "babel-jest": "^29.6.3",
     "eslint": "^8.19.0",
     "jest": "^29.6.3",
     "prettier": "2.8.8",
-    "react-test-renderer": "18.3.1",
+    "react-test-renderer": "19.0.0",
     "typescript": "5.0.4"
   },
   "engines": {

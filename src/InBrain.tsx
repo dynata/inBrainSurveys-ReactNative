@@ -3,23 +3,30 @@ import {
   NativeModules,
   NativeEventEmitter,
   EmitterSubscription,
-} from 'react-native';
+} from 'react-native'
 
-import { assertIsColor, assertNotNullNorEmpty, wrapPromise } from './Utils';
-import { mapRewards, mapSurveys } from './MappingUtils';
-import { DataPoints, StatusBarConfig, NavigationBarConfig } from './Options';
+import {
+  assertIsColor,
+  assertNotNullNorEmpty,
+  wrapPromise,
+} from './utils/Utils'
+
+import { mapRewards, mapSurveys, mapOffers, mapCurrencySale } from './utils/MappingUtils'
+import { StatusBarConfig, NavigationBarConfig } from './config'
 import {
   InBrainReward,
   InBrainNativeSurvey,
   InBrainSurveyFilter,
+  InBrainNativeOffer,
+  InBrainOfferFilter,
   OnCloseSurveysData,
   InBrainCurrencySale,
   InBrainWallOption,
-} from './Models';
+} from './models'
 
-const { InBrainSurveys } = NativeModules;
+const { InBrainSurveys } = NativeModules
 
-const inbrainEmitter = new NativeEventEmitter(InBrainSurveys);
+const inbrainEmitter = new NativeEventEmitter(InBrainSurveys)
 // ----------------------- Setup InBrain -------------------------------
 
 /**
@@ -33,56 +40,61 @@ const setInBrain = (
   apiSecret: string,
   userId?: string
 ) => {
-  validateClientData(apiClientId, apiSecret);
-  InBrainSurveys.setInBrain(apiClientId, apiSecret);
-  InBrainSurveys.setUserID(userId);
-};
+  validateClientData(apiClientId, apiSecret)
+  InBrainSurveys.setInBrain(apiClientId, apiSecret)
+  InBrainSurveys.setUserID(userId)
+}
 
 /**
  *  Set uniq identifier of user within your application. If value not set (or empty) - `deviceId` will be used
  *  @param userID The string value that uniquely identifies each user within your application
  */
 const setUserID = (userID: string | undefined) =>
-  InBrainSurveys.setUserID(userID);
+  InBrainSurveys.setUserID(userID)
 
 /**
  * Set the value to track user session. This value is provided via S2S Callbacks as SessionId.
  * @param sessionId Session identifier
  */
 const setSessionID = (sessionId: string) =>
-  InBrainSurveys.setSessionID(sessionId);
+  InBrainSurveys.setSessionID(sessionId)
+
+/**
+ * Option: Data points
+ */
+export type DataPoints = { [key: string]: string }
 
 /**
  * Provide information about the user
  * @param dataPoints User information
  */
 const setDataOptions = (dataPoints: DataPoints) =>
-  InBrainSurveys.setDataOptions(dataPoints);
+  InBrainSurveys.setDataOptions(dataPoints)
 
 /**
  * Customize Status Bar to match your application style
  * @param config Status Bar configuration
  */
 const setStatusBarConfig = (config: StatusBarConfig) => {
-  if (Platform.OS == 'ios') {
-    InBrainSurveys.setStatusBarLight(config.lightStatusBar ?? true);
+  if (Platform.OS === 'ios') {
+    InBrainSurveys.setStatusBarLight(config.lightStatusBar ?? true)
   } else {
-    config.statusBarColor && assertIsColor(config.statusBarColor);
+    config.statusBarColor && assertIsColor(config.statusBarColor)
     InBrainSurveys.setStatusBarConfig(
       config.lightStatusBar ?? false,
       config.statusBarColor
-    );
+    )
   }
-};
+}
 
 /**
  * Customize Navigation Bar to match your application style
  * @param config Navigation Bar configuration
  */
 const setNavigationBarConfig = (config: NavigationBarConfig) => {
-  config.backgroundColor && assertIsColor(config.backgroundColor);
-  config.buttonsColor && assertIsColor(config.buttonsColor);
-  config.titleColor && assertIsColor(config.titleColor);
+  config.backgroundColor && assertIsColor(config.backgroundColor)
+  config.buttonsColor && assertIsColor(config.buttonsColor)
+  config.titleColor && assertIsColor(config.titleColor)
 
   InBrainSurveys.setNavigationBarConfig(
     config.backgroundColor,
@@ -90,8 +102,31 @@ const setNavigationBarConfig = (config: NavigationBarConfig) => {
     config.titleColor,
     config.title,
     config.hasShadow ?? false
-  );
-};
+  )
+}
+
+/**
+ * Get the rewards
+ */
+const getRewards = () =>
+  wrapPromise<InBrainReward[]>(() => InBrainSurveys.getRewards())
+
+/**
+ * Manually confirm a list of rewards
+ * @param rewards The rewards to confirm
+ */
+const confirmRewards = (rewards: InBrainReward[]) =>
+  wrapPromise<void>(() => InBrainSurveys.confirmRewards(rewards))
+
+/**
+ * Get Currency Sale
+ */
+const getCurrencySale = () =>
+  wrapPromise<InBrainCurrencySale | undefined>(() => {
+    return InBrainSurveys.getCurrencySale().then((sale: any) => {
+      return mapCurrencySale(sale)
+    })
+  })
 
 /**
  * Set the listener when the webview is dismissed or webview is dismissed from within the webview
@@ -102,24 +137,24 @@ const setOnSurveysCloseLister = (
 ): EmitterSubscription => {
   return inbrainEmitter.addListener('OnSurveysClose', (data: any) => {
     if (data?.rewards) {
-      data.rewards = mapRewards(data?.rewards);
+      data.rewards = mapRewards(data?.rewards)
     }
-    callback(data);
-  });
-};
+    callback(data)
+  })
+}
 
 /**
  * Check if surveys are available to show
  */
 const checkSurveysAvailable = () =>
-  wrapPromise<boolean>(() => InBrainSurveys.checkSurveysAvailable());
+  wrapPromise<boolean>(() => InBrainSurveys.checkSurveysAvailable())
 
 /**
  * Opens the InBrain survey wall
  * @param option Indicates which feature is available at the dashboard: Surveys, Offers, or both
  */
 const openWall = (option: InBrainWallOption = InBrainWallOption.surveys) =>
-  wrapPromise<void>(() => InBrainSurveys.openWall(option));
+  wrapPromise<void>(() => InBrainSurveys.openWall(option))
 
 /**
  * Get Native Surveys
@@ -132,74 +167,84 @@ const getNativeSurveys = (filter?: InBrainSurveyFilter) =>
       filter?.categoryIds,
       filter?.excludedCategoryIds
     ).then((surveys: Array<[string: any]>) => {
-      return mapSurveys(surveys);
-    });
-  });
+      return mapSurveys(surveys)
+    })
+  })
 
 /**
- * Show a specific Native Survey. All the configs should be done `BEFORE` calling `showNativeSurvey()`.
+ * Open a specific Native Survey. All the configs should be done `BEFORE` calling `openSurvey()`.
  * @param id the survey's identifier
  * @param searchId a mandatory identifier
  * @param offersEnabled Specifies whether to enable Offers feature at the dashboard or not
  */
-const showNativeSurvey = (
+const openSurvey = (
   id: string,
   searchId: string,
   offersEnabled: boolean = false
 ) =>
   wrapPromise<void>(() =>
     InBrainSurveys.showNativeSurvey(id, searchId, offersEnabled)
-  );
+  )
+/**
+ * Get Native Offers
+ * @param filter an optional parameter to filter offers by type, limit, and offset
+ */
+const getNativeOffers = (filter?: InBrainOfferFilter) =>
+  wrapPromise<InBrainNativeOffer[]>(() => {
+    return InBrainSurveys.getNativeOffers(filter).then(
+      (offers: Array<[string: any]>) => {
+        return mapOffers(offers)
+      }
+    )
+  })
 
 /**
- * Get the rewards
+ * Open a specific Native Offer
+ * @param id the offer's identifier
  */
-const getRewards = () =>
-  wrapPromise<InBrainReward[]>(() => InBrainSurveys.getRewards());
-
-/**
- * Manually confirm a list of rewards
- * @param rewards The rewards to confirm
- */
-const confirmRewards = (rewards: InBrainReward[]) =>
-  wrapPromise<void>(() => InBrainSurveys.confirmRewards(rewards));
-
-/**
- * Get Currency Sale
- */
-const getCurrencySale = () =>
-  wrapPromise<InBrainCurrencySale>(() => InBrainSurveys.getCurrencySale());
+const openOfferWith = (id: number) =>
+  wrapPromise<void>(() => InBrainSurveys.openOfferWith(id))
 
 // ----------------------- Deprecated -------------------------------
 /**
  * @deprecated Use openWall() instead
  */
 const showSurveys = () =>
-  wrapPromise<void>(() => openWall(InBrainWallOption.surveys));
+  wrapPromise<void>(() => openWall(InBrainWallOption.surveys))
 
+/**
+ * @deprecated Use openSurvey() instead
+ */
+const showNativeSurvey = (
+  id: string,
+  searchId: string,
+  offersEnabled: boolean = false
+) => {
+  return openSurvey(id, searchId, offersEnabled)
+}
 // ----------------------- Unsupported -------------------------------
 
 /**
  * @unsupported Please, use setInBrain fucntion instead
  */
-const init = () => {};
+const init = () => {}
 
 /**
  * @unsupported Please, use setSessionID and setDataOptions instead
  */
-const setSessionParameters = () => {};
+const setSessionParameters = () => {}
 
 // ------ Callbacks -----
 
 /**
  * @unsupported Please, use setOnSurveysCloseLister instead
  */
-const setOnCloseListener = () => {};
+const setOnCloseListener = () => {}
 
 /**
  * @unsupported Please, use setOnSurveysCloseLister instead
  */
-const setOnCloseListenerFromPage = () => {};
+const setOnCloseListenerFromPage = () => {}
 
 // ----------------------- Private -------------------------------
 
@@ -207,9 +252,9 @@ const setOnCloseListenerFromPage = () => {};
  * Validation for apiClientId and apiSecret.
  */
 const validateClientData = (apiClientId: string, apiSecret: string) => {
-  assertNotNullNorEmpty("apiClientId", apiClientId);
-  assertNotNullNorEmpty("apiSecret", apiSecret);
-};
+  assertNotNullNorEmpty('apiClientId', apiClientId)
+  assertNotNullNorEmpty('apiSecret', apiSecret)
+}
 
 export default {
   setInBrain,
@@ -224,7 +269,10 @@ export default {
   showSurveys,
   openWall,
   getNativeSurveys,
+  openNativeSurvey: openSurvey,
   showNativeSurvey,
+  getNativeOffers,
+  openOfferWith,
   getCurrencySale,
 
   getRewards,
@@ -234,4 +282,4 @@ export default {
   setSessionParameters,
   setOnCloseListener,
   setOnCloseListenerFromPage,
-};
+}

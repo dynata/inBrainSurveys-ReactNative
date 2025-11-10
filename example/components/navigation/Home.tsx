@@ -94,6 +94,9 @@ const Home = ({navigation}: RouterProps) => {
         onClickShowNativeSurveys={() => {
           navigation.navigate('NativeSurveys');
         }}
+        onClickShowNativeOffers={() => {
+          navigation.navigate('NativeOffers');
+        }}
       />
       <View style={styles.footer}>
         <View style={styles.logoContainer}>

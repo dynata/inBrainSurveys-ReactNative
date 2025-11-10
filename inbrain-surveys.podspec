@@ -11,15 +11,15 @@ Pod::Spec.new do |s|
   s.license      = package["license"]
 
   s.author       = package["author"]
-  s.homepage     = "https://github.com/inbrainai/sdk-react"
+  s.homepage     = "https://github.com/dynata/inBrainSurveys-ReactNative"
 
   
   s.platforms    = { :ios => "12.0" }
-  s.source       = { :git => "https://github.com/inbrainai/sdk-react.git", :tag => "#{s.version}" }
+  s.source       = { :git => "https://github.com/dynata/inBrainSurveys-ReactNative.git", :tag => "#{s.version}" }
 
   s.source_files = "ios/*.{h,m,swift}"
 
   s.dependency "React"
-  s.dependency 'InBrainSurveys', '~> 2.5.1'
+  s.dependency 'InBrainSurveys', '~> 3.0.0'
 
 end
