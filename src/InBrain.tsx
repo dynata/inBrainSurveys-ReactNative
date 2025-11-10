@@ -168,12 +168,12 @@ const getNativeSurveys = (filter?: InBrainSurveyFilter) =>
   })
 
 /**
- * Show a specific Native Survey. All the configs should be done `BEFORE` calling `showNativeSurvey()`.
+ * Open a specific Native Survey. All the configs should be done `BEFORE` calling `openNativeSurvey()`.
  * @param id the survey's identifier
  * @param searchId a mandatory identifier
  * @param offersEnabled Specifies whether to enable Offers feature at the dashboard or not
  */
-const showNativeSurvey = (
+const openNativeSurvey = (
   id: string,
   searchId: string,
   offersEnabled: boolean = false
@@ -181,7 +181,6 @@ const showNativeSurvey = (
   wrapPromise<void>(() =>
     InBrainSurveys.showNativeSurvey(id, searchId, offersEnabled)
   )
-
 /**
  * Get Native Offers
  * @param filter an optional parameter to filter offers by type, limit, and offset
@@ -209,6 +208,16 @@ const openOfferWith = (id: number) =>
 const showSurveys = () =>
   wrapPromise<void>(() => openWall(InBrainWallOption.surveys))
 
+/**
+ * @deprecated Use openNativeSurvey() instead
+ */
+const showNativeSurvey = (
+  id: string,
+  searchId: string,
+  offersEnabled: boolean = false
+) => {
+  return openNativeSurvey(id, searchId, offersEnabled)
+}
 // ----------------------- Unsupported -------------------------------
 
 /**
@@ -256,6 +265,7 @@ export default {
   showSurveys,
   openWall,
   getNativeSurveys,
+  openNativeSurvey,
   showNativeSurvey,
   getNativeOffers,
   openOfferWith,
