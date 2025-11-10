@@ -20,7 +20,7 @@ export const assertNotNullNorEmpty = (
   attributeName: string,
   attributeValue: string
 ) => {
-  if (!attributeValue || attributeValue.trim() == "") {
+  if (!attributeValue || attributeValue.trim() === '') {
     throw Error(`${attributeName} must not be null or empty`);
   }
 };
@@ -38,7 +38,7 @@ export const wrapPromise = async <T extends {} | void>(
     return await promiseSupplier();
   } catch (err: any) {
     // If error corresponds to null activity (happens occasionally in Android), then we retry
-    if (err.code == 'ERR_NULL_CURRENT_ACTIVITY' && count < 10) {
+    if (err.code === 'ERR_NULL_CURRENT_ACTIVITY' && count < 10) {
       await timeout(50); // -- sleep 50ms
       return wrapPromise(promiseSupplier, count + 1);
     }
@@ -53,5 +53,5 @@ export const wrapPromise = async <T extends {} | void>(
  * @param ms
  */
 const timeout = (ms: number): Promise<void> => {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 };

@@ -64,7 +64,7 @@ const setDataOptions = (dataPoints: DataPoints) =>
  * @param config Status Bar configuration
  */
 const setStatusBarConfig = (config: StatusBarConfig) => {
-  if (Platform.OS == 'ios') {
+  if (Platform.OS === 'ios') {
     InBrainSurveys.setStatusBarLight(config.lightStatusBar ?? true);
   } else {
     config.statusBarColor && assertIsColor(config.statusBarColor);
@@ -207,8 +207,8 @@ const setOnCloseListenerFromPage = () => {};
  * Validation for apiClientId and apiSecret.
  */
 const validateClientData = (apiClientId: string, apiSecret: string) => {
-  assertNotNullNorEmpty("apiClientId", apiClientId);
-  assertNotNullNorEmpty("apiSecret", apiSecret);
+  assertNotNullNorEmpty('apiClientId', apiClientId);
+  assertNotNullNorEmpty('apiSecret', apiSecret);
 };
 
 export default {
