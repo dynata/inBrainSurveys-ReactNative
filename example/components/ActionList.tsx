@@ -57,14 +57,16 @@ const ActionList = ({
         />
       </View>
       <View style={styles.flex}>
-        <ActionButton text="Open Wall" onPress={onClickShowWall} />
+        <ActionButton text="Open Wall" onPress={onClickShowWall} isPortrait={isPortrait} />
         <ActionButton
           text="Show Native Surveys"
           onPress={onClickShowNativeSurveys}
+          isPortrait={isPortrait}
         />
         <ActionButton
           text="Show Native Offers"
           onPress={onClickShowNativeOffers}
+          isPortrait={isPortrait}
         />
         <Text style={styles.points}>Total Points: {reward}</Text>
       </View>
@@ -78,10 +80,10 @@ export default ActionList;
  * Button in the action lise
  */
 
-const ActionButton = ({onPress, text}: ActionButtonProps) => {
+const ActionButton = ({onPress, text, isPortrait}: ActionButtonProps) => {
   return (
     <TouchableOpacity onPress={onPress}>
-      <View style={styles.actionButtons}>
+      <View style={[styles.actionButtons, !isPortrait && styles.actionButtonsLandscape]}>
         <ImageBackground
           source={require('../assets/OrangeButton.png')}
           resizeMode={'stretch'}
@@ -98,6 +100,7 @@ const ActionButton = ({onPress, text}: ActionButtonProps) => {
 type ActionButtonProps = {
   onPress: () => void;
   text: string;
+  isPortrait: boolean | undefined;
 };
 
 const styles = StyleSheet.create({
@@ -120,7 +123,8 @@ const styles = StyleSheet.create({
     height: '100%',
     alignItems: 'center',
     flexDirection: 'column',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+    paddingTop: 20,
     flex: 1,
   },
   imageFloatingLady: {
@@ -130,11 +134,15 @@ const styles = StyleSheet.create({
   actionButtons: {
     flexDirection: 'column',
     height: 80,
-    marginBottom: 20,
+    marginBottom: 10,
     marginLeft: 30,
     marginRight: 30,
     alignSelf: 'center',
     maxWidth: 550,
+  },
+  actionButtonsLandscape: {
+    height: 60,
+    marginBottom: 7,
   },
   flex: {
     flex: 1,

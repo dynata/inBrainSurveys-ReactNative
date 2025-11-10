@@ -8,7 +8,8 @@
     "start": "react-native start",
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "update-sdk": "cd .. && npm run build && npm pack && cd example && npm remove inbrain-surveys && npm install ../inbrain-surveys-*.tgz && cd ios && pod install && cd .."
   },
   "dependencies": {
     "@react-navigation/native": "^6.1.18",

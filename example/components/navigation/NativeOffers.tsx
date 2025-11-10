@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   FlatList,
   Image,
+  ActivityIndicator,
 } from 'react-native'
 import {Points, ActivityWithOverlay} from '../common'
 import {mScale} from '../utils/metrics'
@@ -69,13 +70,14 @@ const NativeOffersList = () => {
    * How to call inbrain.openOfferWith(id: number)
    */
   const onPressOpenOffer = (nativeOffer: InBrainNativeOffer) => {
-    inbrain
+    return inbrain
       ?.openOfferWith(nativeOffer.id)
       .then(() => {
         console.log('[Open Native Offer SUCCESS]')
       })
       .catch((err: Error) => {
         console.log(err)
+        throw err
       })
   }
 
@@ -107,8 +109,21 @@ export default NativeOffersList
 /**
  * Native Offer Card Component
  */
-const NativeOffer = ({offer, onPress}: NativeOfferProps) => {
+const NativeOffer = ({offer, onPress}: TNativeOfferItemProps) => {
   const hasPromotion = offer.promotion !== undefined
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  const handlePress = () => {
+    setIsLoading(true)
+
+    onPress(offer)
+      .then(() => {
+        setIsLoading(false)
+      })
+      .catch(() => {
+        setIsLoading(false)
+      })
+  }
 
   return (
     <View style={styles.offerView}>
@@ -154,14 +169,19 @@ const NativeOffer = ({offer, onPress}: NativeOfferProps) => {
           <View style={styles.offerActionBox}>
             <TouchableOpacity
               style={styles.startOfferBtn}
-              onPress={() => onPress(offer)}>
-              <Text
-                adjustsFontSizeToFit
-                allowFontScaling
-                numberOfLines={1}
-                style={styles.startOfferBtnText}>
-                Start Offer
-              </Text>
+              onPress={handlePress}
+              disabled={isLoading}>
+              {isLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text
+                  adjustsFontSizeToFit
+                  allowFontScaling
+                  numberOfLines={1}
+                  style={styles.startOfferBtnText}>
+                  Start Offer
+                </Text>
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -170,9 +190,9 @@ const NativeOffer = ({offer, onPress}: NativeOfferProps) => {
   )
 }
 
-type NativeOfferProps = {
+type TNativeOfferItemProps = {
   offer: InBrainNativeOffer
-  onPress: (offer: InBrainNativeOffer) => void
+  onPress: (offer: InBrainNativeOffer) => Promise<void>
 }
 
 /**
@@ -194,21 +214,23 @@ const styles = StyleSheet.create({
     elevation: 99,
   },
   offerView: {
-    height: 240,
     flex: 1,
     paddingTop: mScale(10),
-    justifyContent: 'space-between',
     paddingHorizontal: mScale(5),
+    height: 280,
   },
   offerBox: {
     alignItems: 'center',
-    height: '100%',
+    flex: 1,
+    justifyContent: 'space-between',
   },
   card: {
     backgroundColor: '#fff',
     borderRadius: 10,
-    padding: mScale(10),
+    padding: 0,
+    paddingBottom: mScale(10),
     width: '100%',
+    flex: 1,
     alignSelf: 'center',
   },
   shadow: {
@@ -228,8 +250,9 @@ const styles = StyleSheet.create({
   },
   thumbnailContainer: {
     width: '100%',
-    height: 80,
-    borderRadius: 8,
+    height: 100,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
     overflow: 'hidden',
     marginBottom: mScale(8),
   },
@@ -239,9 +262,11 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     width: '100%',
-    height: 40,
+    minHeight: 36,
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: mScale(2),
+    paddingHorizontal: mScale(8),
   },
   offerTitle: {
     fontSize: 14,
@@ -250,12 +275,13 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   textOfferPoints: {
-    paddingVertical: mScale(8),
+    paddingVertical: mScale(2),
   },
   offerCategoryBox: {
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: mScale(4),
+    paddingVertical: mScale(1),
+    marginBottom: mScale(4),
   },
   offerCategory: {
     color: '#92D050',
@@ -263,9 +289,9 @@ const styles = StyleSheet.create({
     fontWeight: '400',
   },
   offerActionBox: {
-    width: '90%',
+    width: '100%',
     justifyContent: 'center',
-    marginTop: mScale(8),
+    paddingHorizontal: mScale(10),
   },
   startOfferBtn: {
     padding: mScale(8),
