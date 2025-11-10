@@ -1,4 +1,4 @@
-import { Category } from '../Surveys/Category'
+import { Category } from '../surveys/Category'
 
 /**
  * Survey Outcome Type
