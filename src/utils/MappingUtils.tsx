@@ -1,4 +1,9 @@
-import { InBrainNativeSurvey, InBrainSurveyReward, Category } from '../models'
+import {
+  InBrainNativeSurvey,
+  InBrainSurveyReward,
+  InBrainNativeOffer,
+  Category,
+} from '../models'
 
 // Map Native Surveys //
 export const mapSurveys = (
@@ -35,6 +40,34 @@ export const mapRewards = (nativeRewards: any): InBrainSurveyReward[] => {
       name: getOutcomeTypeName(outcomeTypeId),
     }
     return reward
+  })
+}
+
+// Map Native Offers
+export const mapOffers = (
+  nativeOffers: Array<[string: any]>
+): InBrainNativeOffer[] => {
+  return nativeOffers.map((offer: any) => {
+    // Convert completeBy string to Date if present in goals
+    if (offer.standardGoals) {
+      offer.standardGoals = offer.standardGoals.map((goal: any) => {
+        if (goal.completeBy) {
+          goal.completeBy = new Date(goal.completeBy)
+        }
+        return goal
+      })
+    }
+
+    if (offer.purchaseGoals) {
+      offer.purchaseGoals = offer.purchaseGoals.map((goal: any) => {
+        if (goal.completeBy) {
+          goal.completeBy = new Date(goal.completeBy)
+        }
+        return goal
+      })
+    }
+
+    return offer
   })
 }
 

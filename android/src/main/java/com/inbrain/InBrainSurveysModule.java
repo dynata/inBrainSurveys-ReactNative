@@ -19,6 +19,7 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.inbrain.sdk.InBrain;
 
 import com.inbrain.sdk.callback.GetNativeSurveysCallback;
+import com.inbrain.sdk.callback.GetNativeOffersCallback;
 import com.inbrain.sdk.callback.GetRewardsCallback;
 import com.inbrain.sdk.callback.InBrainCallback;
 import com.inbrain.sdk.callback.StartSurveysCallback;
@@ -35,6 +36,11 @@ import com.inbrain.sdk.model.SurveyFilter;
 import com.inbrain.sdk.model.InBrainSurveyReward;
 import com.inbrain.sdk.model.CurrencySale;
 import com.inbrain.sdk.model.WallOption;
+import com.inbrain.sdk.model.Offer;
+import com.inbrain.sdk.model.OfferFilter;
+import com.inbrain.sdk.model.OfferType;
+import com.inbrain.sdk.model.OfferGoal;
+import com.inbrain.sdk.model.OfferPromotion;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -251,6 +257,109 @@ public class InBrainSurveysModule extends ReactContextBaseJavaModule implements 
         });
     }
 
+    // *******************************
+    // ***** GET NATIVE OFFERS *******
+    // *******************************
+    @ReactMethod
+    public void getNativeOffers(final ReadableMap filterMap, final Promise promise) {
+        OfferFilter filter = null;
+        
+        if (filterMap != null) {
+            Integer type = filterMap.hasKey("type") ? filterMap.getInt("type") : null;
+            Integer limit = filterMap.hasKey("limit") ? filterMap.getInt("limit") : null;
+            Integer offset = filterMap.hasKey("offset") ? filterMap.getInt("offset") : null;
+            
+            if (type != null) {
+                OfferType offerType = OfferType.Companion.fromRaw(type);
+                int limitValue = limit != null ? limit : 10;
+                int offsetValue = offset != null ? offset : 0;
+                filter = new OfferFilter(offerType, limitValue, offsetValue);
+            }
+        }
+        
+        InBrain.getInstance().getNativeOffers(filter, new GetNativeOffersCallback() {
+            @Override
+            public void nativeOffersReceived(List<Offer> offers) {
+                WritableArray array = Arguments.createArray();
+                
+                for (Offer offer : offers) {
+                    WritableMap map = Arguments.createMap();
+                    
+                    map.putInt("id", offer.getId());
+                    map.putString("title", offer.getTitle());
+                    map.putDouble("reward", offer.getReward());
+                    map.putString("rewardString", offer.getRewardString());
+                    map.putInt("featuredRank", offer.getFeaturedRank());
+                    
+                    if (offer.getThumbnailUrl() != null) {
+                        map.putString("thumbnailUrl", offer.getThumbnailUrl());
+                    }
+                    if (offer.getHeroImageUrl() != null) {
+                        map.putString("heroImageUrl", offer.getHeroImageUrl());
+                    }
+                    if (offer.getDescription() != null && !offer.getDescription().isEmpty()) {
+                        WritableArray descArray = Arguments.createArray();
+                        for (String desc : offer.getDescription()) {
+                            descArray.pushString(desc);
+                        }
+                        map.putArray("offerDescription", descArray);
+                    }
+                    if (offer.getCategories() != null && !offer.getCategories().isEmpty()) {
+                        WritableArray catArray = Arguments.createArray();
+                        for (String cat : offer.getCategories()) {
+                            catArray.pushString(cat);
+                        }
+                        map.putArray("categories", catArray);
+                    }
+                    
+                    if (offer.getPromotion() != null) {
+                        map.putMap("promotion", mapPromotion(offer.getPromotion()));
+                    }
+                    
+                    if (offer.getStandardGoals() != null && !offer.getStandardGoals().isEmpty()) {
+                        WritableArray goalsArray = Arguments.createArray();
+                        for (OfferGoal goal : offer.getStandardGoals()) {
+                            goalsArray.pushMap(mapGoal(goal));
+                        }
+                        map.putArray("standardGoals", goalsArray);
+                    }
+                    
+                    if (offer.getPurchaseGoals() != null && !offer.getPurchaseGoals().isEmpty()) {
+                        WritableArray goalsArray = Arguments.createArray();
+                        for (OfferGoal goal : offer.getPurchaseGoals()) {
+                            goalsArray.pushMap(mapGoal(goal));
+                        }
+                        map.putArray("purchaseGoals", goalsArray);
+                    }
+                    
+                    array.pushMap(map);
+                }
+                
+                promise.resolve(array);
+            }
+        });
+    }
+
+    // *******************************
+    // ***** OPEN OFFER WITH *********
+    // *******************************
+    @ReactMethod
+    public void openOfferWith(final int offerId, final Promise promise) {
+        final OpenOfferCallback callback = new OpenOfferCallback() {
+            @Override
+            public void onSuccess() {
+                promise.resolve(null);
+            }
+            
+            @Override
+            public void onFail(String message) {
+                promise.reject("ERR_OPEN_OFFER", message);
+            }
+        };
+        
+        InBrain.getInstance().openOfferWithId(offerId, getReactApplicationContext(), callback);
+    }
+
     // ************************************
     // ***** SET NAVIGATION BAR CONFIG *****
     // *************************************
@@ -389,6 +498,43 @@ public class InBrainSurveysModule extends ReactContextBaseJavaModule implements 
     // ***************************
     // ***** UTILITY METHODS *****
     // ***************************
+    
+    /**
+     * Map OfferGoal to WritableMap for React Native
+     */
+    private WritableMap mapGoal(OfferGoal goal) {
+        WritableMap goalMap = Arguments.createMap();
+        goalMap.putInt("id", goal.getId());
+        goalMap.putString("title", goal.getTitle());
+        goalMap.putString("goalDescription", goal.getDescription());
+        goalMap.putDouble("reward", goal.getReward());
+        goalMap.putString("rewardString", goal.getRewardString());
+        goalMap.putBoolean("isCompleted", goal.isCompleted());
+        goalMap.putInt("sortOrder", goal.getSortOrder());
+        goalMap.putInt("attributionWindowMinutes", goal.getAttributionWindowMinutes());
+        
+        if (goal.getCompleteBy() != null) {
+            goalMap.putString("completeBy", goal.getCompleteBy());
+        }
+        
+        if (goal.getPromotion() != null) {
+            goalMap.putMap("promotion", mapPromotion(goal.getPromotion()));
+        }
+        
+        return goalMap;
+    }
+    
+    /**
+     * Map OfferPromotion to WritableMap for React Native
+     */
+    private WritableMap mapPromotion(OfferPromotion promotion) {
+        WritableMap promotionMap = Arguments.createMap();
+        promotionMap.putDouble("multiplier", promotion.getMultiplier());
+        promotionMap.putDouble("originalReward", promotion.getOriginalReward());
+        promotionMap.putString("originalRewardString", promotion.getOriginalRewardString());
+        return promotionMap;
+    }
+    
     private Activity getCurrentActivityOrThrow() throws NullCurrentActivityException {
         Activity activity = getCurrentActivity();
 

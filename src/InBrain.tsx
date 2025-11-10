@@ -11,12 +11,14 @@ import {
   wrapPromise,
 } from './utils/Utils'
 
-import { mapRewards, mapSurveys } from './utils/MappingUtils'
+import { mapRewards, mapSurveys, mapOffers } from './utils/MappingUtils'
 import { StatusBarConfig, NavigationBarConfig } from './config'
 import {
   InBrainReward,
   InBrainNativeSurvey,
   InBrainSurveyFilter,
+  InBrainNativeOffer,
+  InBrainOfferFilter,
   OnCloseSurveysData,
   InBrainCurrencySale,
   InBrainWallOption,
@@ -104,6 +106,25 @@ const setNavigationBarConfig = (config: NavigationBarConfig) => {
 }
 
 /**
+ * Get the rewards
+ */
+const getRewards = () =>
+  wrapPromise<InBrainReward[]>(() => InBrainSurveys.getRewards())
+
+/**
+ * Manually confirm a list of rewards
+ * @param rewards The rewards to confirm
+ */
+const confirmRewards = (rewards: InBrainReward[]) =>
+  wrapPromise<void>(() => InBrainSurveys.confirmRewards(rewards))
+
+/**
+ * Get Currency Sale
+ */
+const getCurrencySale = () =>
+  wrapPromise<InBrainCurrencySale>(() => InBrainSurveys.getCurrencySale())
+
+/**
  * Set the listener when the webview is dismissed or webview is dismissed from within the webview
  * @param callback Callback to execute
  */
@@ -162,23 +183,24 @@ const showNativeSurvey = (
   )
 
 /**
- * Get the rewards
+ * Get Native Offers
+ * @param filter an optional parameter to filter offers by type, limit, and offset
  */
-const getRewards = () =>
-  wrapPromise<InBrainReward[]>(() => InBrainSurveys.getRewards())
+const getNativeOffers = (filter?: InBrainOfferFilter) =>
+  wrapPromise<InBrainNativeOffer[]>(() => {
+    return InBrainSurveys.getNativeOffers(filter).then(
+      (offers: Array<[string: any]>) => {
+        return mapOffers(offers)
+      }
+    )
+  })
 
 /**
- * Manually confirm a list of rewards
- * @param rewards The rewards to confirm
+ * Open a specific Native Offer
+ * @param id the offer's identifier
  */
-const confirmRewards = (rewards: InBrainReward[]) =>
-  wrapPromise<void>(() => InBrainSurveys.confirmRewards(rewards))
-
-/**
- * Get Currency Sale
- */
-const getCurrencySale = () =>
-  wrapPromise<InBrainCurrencySale>(() => InBrainSurveys.getCurrencySale())
+const openOfferWith = (id: number) =>
+  wrapPromise<void>(() => InBrainSurveys.openOfferWith(id))
 
 // ----------------------- Deprecated -------------------------------
 /**
@@ -235,6 +257,8 @@ export default {
   openWall,
   getNativeSurveys,
   showNativeSurvey,
+  getNativeOffers,
+  openOfferWith,
   getCurrencySale,
 
   getRewards,

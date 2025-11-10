@@ -10,9 +10,9 @@ export enum InBrainOfferType {
 /**
  * InBrainOfferFilter
  *
- * @param type - Type of the Offers to be returned
- * @param limit - Maximum amount of offers to be returned (default: 10)
- * @param offset - Offset from the beginning of the list (default: 0)
+ * @param type - Type of the Offers to be returned (required)
+ * @param limit - Maximum amount of offers to be returned (optional, default: 10)
+ * @param offset - Offset from the beginning of the list (optional, default: 0)
  *
  * @important When using `started` type, the `limit` and `offset` parameters are ignored by the API
  */
