@@ -14,11 +14,13 @@ import {useReward} from './context/RewardContext';
 type ActionListProps = {
   onClickShowWall: () => void;
   onClickShowNativeSurveys: () => void;
+  onClickShowNativeOffers: () => void;
 };
 
 const ActionList = ({
   onClickShowWall,
   onClickShowNativeSurveys,
+  onClickShowNativeOffers,
 }: ActionListProps) => {
   const [isPortrait, setIsPortrait] = useState<boolean>();
   const {reward} = useReward();
@@ -59,6 +61,10 @@ const ActionList = ({
         <ActionButton
           text="Show Native Surveys"
           onPress={onClickShowNativeSurveys}
+        />
+        <ActionButton
+          text="Show Native Offers"
+          onPress={onClickShowNativeOffers}
         />
         <Text style={styles.points}>Total Points: {reward}</Text>
       </View>
