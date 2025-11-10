@@ -1,4 +1,4 @@
-import { enhanceError } from './Errors';
+import { enhanceError } from '../Errors';
 
 /**
  * Assert the color is an hex color (e.g #ffffff)

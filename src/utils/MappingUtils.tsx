@@ -1,4 +1,4 @@
-import { InBrainNativeSurvey, InBrainSurveyReward, Category } from './Models';
+import { InBrainNativeSurvey, InBrainSurveyReward, Category } from '../models/Models';
 
 // Map Native Surveys //
 export const mapSurveys = (

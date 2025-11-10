@@ -5,9 +5,14 @@ import {
   EmitterSubscription,
 } from 'react-native';
 
-import { assertIsColor, assertNotNullNorEmpty, wrapPromise } from './Utils';
-import { mapRewards, mapSurveys } from './MappingUtils';
-import { DataPoints, StatusBarConfig, NavigationBarConfig } from './Options';
+import {
+  assertIsColor,
+  assertNotNullNorEmpty,
+  wrapPromise,
+} from './utils/Utils';
+
+import { mapRewards, mapSurveys } from './utils/MappingUtils';
+import { StatusBarConfig, NavigationBarConfig } from './config';
 import {
   InBrainReward,
   InBrainNativeSurvey,
@@ -15,7 +20,7 @@ import {
   OnCloseSurveysData,
   InBrainCurrencySale,
   InBrainWallOption,
-} from './Models';
+} from './models';
 
 const { InBrainSurveys } = NativeModules;
 
@@ -51,6 +56,11 @@ const setUserID = (userID: string | undefined) =>
  */
 const setSessionID = (sessionId: string) =>
   InBrainSurveys.setSessionID(sessionId);
+
+/**
+ * Option: Data points
+ */
+export type DataPoints = { [key: string]: string };
 
 /**
  * Provide information about the user
