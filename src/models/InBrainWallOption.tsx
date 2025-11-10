@@ -6,4 +6,3 @@ export enum InBrainWallOption {
   surveys = 1,
   offers = 2,
 }
-

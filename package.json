@@ -44,8 +44,6 @@
   "licenseFilename": "LICENSE",
   "readmeFilename": "README.md",
   "devDependencies": {
-    "react": "18.2.0",
-    "react-native": "0.74.0",
     "@babel/core": "^7.20.0",
     "@babel/preset-env": "^7.20.0",
     "@babel/runtime": "^7.20.0",
@@ -57,8 +55,11 @@
     "@types/react-test-renderer": "^18.0.0",
     "babel-jest": "^29.6.3",
     "eslint": "^8.19.0",
+    "eslint-plugin-unicorn": "^55.0.0",
     "jest": "^29.6.3",
     "prettier": "2.8.8",
+    "react": "18.2.0",
+    "react-native": "0.74.0",
     "react-test-renderer": "18.2.0",
     "typescript": "5.0.4"
   },

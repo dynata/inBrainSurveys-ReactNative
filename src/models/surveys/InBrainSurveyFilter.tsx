@@ -2,8 +2,7 @@
  * InBrainSurveyFilter
  */
 export type InBrainSurveyFilter = {
-  placementId?: string;
-  categoryIds?: number[];
-  excludedCategoryIds?: number[];
-};
-
+  placementId?: string
+  categoryIds?: number[]
+  excludedCategoryIds?: number[]
+}

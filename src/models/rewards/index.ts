@@ -1,2 +1,2 @@
-export * from './InBrainReward';
-export * from './InBrainSurveyReward';
+export * from './InBrainReward'
+export * from './InBrainSurveyReward'

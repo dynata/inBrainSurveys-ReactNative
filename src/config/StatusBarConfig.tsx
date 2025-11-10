@@ -1,8 +1,7 @@
 export type StatusBarConfig = {
-  lightStatusBar?: boolean;
+  lightStatusBar?: boolean
   /**
    * Android only option. Have no effect at iOS.
    */
-  statusBarColor?: string;
-};
-
+  statusBarColor?: string
+}

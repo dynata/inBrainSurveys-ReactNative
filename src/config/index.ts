@@ -1,3 +1,2 @@
-export * from './NavigationBarConfig';
-export * from './StatusBarConfig';
-
+export * from './NavigationBarConfig'
+export * from './StatusBarConfig'

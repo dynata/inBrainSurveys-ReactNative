@@ -34,5 +34,4 @@ export const InBrainSurveyCategory = {
   VideoGames: 30,
   FashionAndClothingOther: 31,
   FashionAndClothingDepartmentStore: 32,
-};
-
+}
