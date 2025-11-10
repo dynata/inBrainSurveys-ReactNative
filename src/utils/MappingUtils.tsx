@@ -2,6 +2,7 @@ import {
   InBrainNativeSurvey,
   InBrainSurveyReward,
   InBrainNativeOffer,
+  InBrainCurrencySale,
   Category,
 } from '../models'
 
@@ -69,6 +70,22 @@ export const mapOffers = (
 
     return offer
   })
+}
+
+// Map Currency Sale
+export const mapCurrencySale = (
+  currencySale: any
+): InBrainCurrencySale | undefined => {
+  if (!currencySale) {
+    return undefined
+  }
+
+  // Convert date strings to Date objects
+  return {
+    ...currencySale,
+    startOn: new Date(currencySale.startOn),
+    endOn: new Date(currencySale.endOn),
+  }
 }
 
 // Map categories for Native Surveys and for the rewards from onClose callback

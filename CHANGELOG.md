@@ -16,12 +16,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - `getNativeOffers(filter)` function to `InBrain` for fetching native offers
   - `openOfferWith(id)` function to `InBrain` for opening specific offers
 - **New Survey Functions:**
-  - `openSurvey(survey, offersEnabled)` function to `InBrain`
-  - `openSurveyWith(surveyId, searchId, offersEnabled)` function to `InBrain`
+  - `openSurvey(id, searchId, offersEnabled)` function to `InBrain` for opening native surveys
 
 ### Changed
 - Updated native iOS SDK to 3.0.0
 - Updated native Android SDK to 3.1.0
+
+### Fixed
+- `getCurrencySale()` now properly maps the response and returns `InBrainCurrencySale | undefined`
+- `startOn` and `endOn` dates in `InBrainCurrencySale` at Android is returned as Date objects instead of strings
+
+### Deprecated
+- `showNativeSurvey()` method in favor of new `openSurvey()` method
 
 ## [3.2.2](https://github.com/dynata/inBrainSurveys-ReactNative/releases/tag/3.2.2) - 2025-07-30
 

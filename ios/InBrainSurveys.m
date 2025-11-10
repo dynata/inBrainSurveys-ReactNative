@@ -19,7 +19,7 @@
     
     _dateFormatter = [[NSDateFormatter alloc] init];
     [_dateFormatter setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"UTC"]];
-    [_dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ssZ"];
+    [_dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"];
     
     return self;
 }

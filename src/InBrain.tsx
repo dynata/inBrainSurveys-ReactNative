@@ -11,7 +11,7 @@ import {
   wrapPromise,
 } from './utils/Utils'
 
-import { mapRewards, mapSurveys, mapOffers } from './utils/MappingUtils'
+import { mapRewards, mapSurveys, mapOffers, mapCurrencySale } from './utils/MappingUtils'
 import { StatusBarConfig, NavigationBarConfig } from './config'
 import {
   InBrainReward,
@@ -122,7 +122,11 @@ const confirmRewards = (rewards: InBrainReward[]) =>
  * Get Currency Sale
  */
 const getCurrencySale = () =>
-  wrapPromise<InBrainCurrencySale>(() => InBrainSurveys.getCurrencySale())
+  wrapPromise<InBrainCurrencySale | undefined>(() => {
+    return InBrainSurveys.getCurrencySale().then((sale: any) => {
+      return mapCurrencySale(sale)
+    })
+  })
 
 /**
  * Set the listener when the webview is dismissed or webview is dismissed from within the webview
@@ -168,12 +172,12 @@ const getNativeSurveys = (filter?: InBrainSurveyFilter) =>
   })
 
 /**
- * Open a specific Native Survey. All the configs should be done `BEFORE` calling `openNativeSurvey()`.
+ * Open a specific Native Survey. All the configs should be done `BEFORE` calling `openSurvey()`.
  * @param id the survey's identifier
  * @param searchId a mandatory identifier
  * @param offersEnabled Specifies whether to enable Offers feature at the dashboard or not
  */
-const openNativeSurvey = (
+const openSurvey = (
   id: string,
   searchId: string,
   offersEnabled: boolean = false
@@ -209,14 +213,14 @@ const showSurveys = () =>
   wrapPromise<void>(() => openWall(InBrainWallOption.surveys))
 
 /**
- * @deprecated Use openNativeSurvey() instead
+ * @deprecated Use openSurvey() instead
  */
 const showNativeSurvey = (
   id: string,
   searchId: string,
   offersEnabled: boolean = false
 ) => {
-  return openNativeSurvey(id, searchId, offersEnabled)
+  return openSurvey(id, searchId, offersEnabled)
 }
 // ----------------------- Unsupported -------------------------------
 
@@ -265,7 +269,7 @@ export default {
   showSurveys,
   openWall,
   getNativeSurveys,
-  openNativeSurvey,
+  openNativeSurvey: openSurvey,
   showNativeSurvey,
   getNativeOffers,
   openOfferWith,
