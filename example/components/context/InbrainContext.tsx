@@ -9,6 +9,8 @@ import {
   OnCloseSurveysData,
   InBrainNativeSurvey,
   InBrainWallOption,
+  InBrainOfferFilter,
+  InBrainNativeOffer,
 } from 'inbrain-surveys';
 
 type InbrainContextType = {
@@ -34,6 +36,10 @@ type InbrainContextType = {
     searchId: string,
     offersEnabled?: boolean,
   ) => Promise<void>;
+  getNativeOffers: (
+    filter?: InBrainOfferFilter | undefined,
+  ) => Promise<InBrainNativeOffer[]>;
+  openOfferWith: (id: number) => Promise<void>;
   getRewards: () => Promise<InBrainReward[]>;
   confirmRewards: (rewards: InBrainReward[]) => Promise<void>;
   setSessionParameters: (sessionUid: string, dataPoints: DataPoints) => void;
