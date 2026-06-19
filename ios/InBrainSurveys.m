@@ -232,11 +232,13 @@ RCT_EXPORT_METHOD(getNativeOffers:(NSDictionary * _Nullable)filterDict
 // ***** OPEN OFFER WITH *********
 // *******************************
 RCT_EXPORT_METHOD(openOfferWith:(NSInteger)offerId resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
-    [_inbrain openOfferWithId:(int)offerId success:^{
-        resolve(@true);
-    } failed:^(NSError * error) {
-        reject(@"ERR_OPEN_OFFER", error.localizedDescription, error);
-    }];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [_inbrain openOfferWithId:(int)offerId success:^{
+            resolve(@true);
+        } failed:^(NSError * error) {
+            reject(@"ERR_OPEN_OFFER", error.localizedDescription, error);
+        }];
+    });
 }
 
 // ***************************

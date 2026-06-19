@@ -11,7 +11,12 @@ import {
   wrapPromise,
 } from './utils/Utils'
 
-import { mapRewards, mapSurveys, mapOffers, mapCurrencySale } from './utils/MappingUtils'
+import {
+  mapRewards,
+  mapSurveys,
+  mapOffers,
+  mapCurrencySale,
+} from './utils/MappingUtils'
 import { StatusBarConfig, NavigationBarConfig } from './config'
 import {
   InBrainReward,

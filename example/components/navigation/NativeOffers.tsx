@@ -69,7 +69,7 @@ const NativeOffersList = () => {
   /**
    * How to call inbrain.openOfferWith(id: number)
    */
-  const onPressOpenOffer = (nativeOffer: InBrainNativeOffer) => {
+  const onPressOpenOffer = async (nativeOffer: InBrainNativeOffer) => {
     return inbrain
       ?.openOfferWith(nativeOffer.id)
       .then(() => {
@@ -94,7 +94,7 @@ const NativeOffersList = () => {
           refreshing={true}
           data={nativeOffersState}
           renderItem={({item}) => (
-            <NativeOffer offer={item} onPress={onPressOpenOffer} />
+            <NativeOffer offer={item} onPress={() => onPressOpenOffer(item)} />
           )}
           numColumns={2}
           keyExtractor={item => item.id.toString()}

@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.3.1](https://github.com/dynata/inBrainSurveys-ReactNative/releases/tag/3.3.1) - 2026-06-19
+
+### Fixed
+- White screen after `Forfeit reward`
+
+### Changed
+- Updated native iOS SDK to 3.0.1
+- Updated native Android SDK to 3.1.1
+
 ## [3.3.0](https://github.com/dynata/inBrainSurveys-ReactNative/releases/tag/3.3.0) - 2025-11-10
 
 ### Added
