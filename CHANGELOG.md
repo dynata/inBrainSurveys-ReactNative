@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [3.3.2](https://github.com/dynata/inBrainSurveys-ReactNative/releases/tag/3.3.2) - 2026-08-11
+
+### Fixed
+- Error `missing session` 
+
+### Changed
+- Updated native iOS SDK to 3.0.2
+- Updated native Android SDK to 3.1.2
+
 ## [3.3.1](https://github.com/dynata/inBrainSurveys-ReactNative/releases/tag/3.3.1) - 2026-06-19
 
 ### Fixed

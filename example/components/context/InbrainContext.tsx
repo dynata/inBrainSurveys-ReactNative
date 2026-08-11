@@ -11,6 +11,7 @@ import {
   InBrainWallOption,
   InBrainOfferFilter,
   InBrainNativeOffer,
+  InBrainCurrencySale,
 } from 'inbrain-surveys';
 
 type InbrainContextType = {
@@ -46,6 +47,7 @@ type InbrainContextType = {
   setOnCloseListener: (callback: () => void) => void;
   setOnCloseListenerFromPage: (callback: () => void) => void;
   openWall: (option?: InBrainWallOption) => Promise<void>;
+  getCurrencySale: () => Promise<InBrainCurrencySale | undefined>;
 };
 
 export const InbrainContext = createContext<InbrainContextType | null>(null);
