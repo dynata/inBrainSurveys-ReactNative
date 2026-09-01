@@ -5,6 +5,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [3.3.3](https://github.com/dynata/inBrainSurveys-ReactNative/releases/tag/3.3.3) - 2026-09-01
+
+### Added
+- New `InBrainNativeOffer` fields: `instructions`, `requirements`, `tags`, `attributionWindowMinutes`, `attemptedAt`, `completeBy`, `campaignCurrencySale`
+
+### Changed
+- Added redirect to `missing session` error
+- Updated native iOS SDK to 3.0.3
+- Updated native Android SDK to 3.1.3
+
 ## [3.3.2](https://github.com/dynata/inBrainSurveys-ReactNative/releases/tag/3.3.2) - 2026-08-11
 
 ### Fixed

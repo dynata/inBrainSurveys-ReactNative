@@ -291,56 +291,7 @@ public class InBrainSurveysModule extends ReactContextBaseJavaModule implements 
                 WritableArray array = Arguments.createArray();
                 
                 for (InBrainNativeOffer offer : offers) {
-                    WritableMap map = Arguments.createMap();
-                    
-                    map.putInt("id", offer.getId());
-                    map.putString("title", offer.getTitle());
-                    map.putDouble("reward", offer.getReward());
-                    map.putString("rewardString", offer.getRewardString());
-                    map.putInt("featuredRank", offer.getFeaturedRank());
-                    
-                    if (offer.getThumbnailUrl() != null) {
-                        map.putString("thumbnailUrl", offer.getThumbnailUrl());
-                    }
-                    if (offer.getHeroImageUrl() != null) {
-                        map.putString("heroImageUrl", offer.getHeroImageUrl());
-                    }
-                    if (offer.getDescription() != null && !offer.getDescription().isEmpty()) {
-                        WritableArray descArray = Arguments.createArray();
-                        for (String desc : offer.getDescription()) {
-                            descArray.pushString(desc);
-                        }
-                        map.putArray("offerDescription", descArray);
-                    }
-                    if (offer.getCategories() != null && !offer.getCategories().isEmpty()) {
-                        WritableArray catArray = Arguments.createArray();
-                        for (String cat : offer.getCategories()) {
-                            catArray.pushString(cat);
-                        }
-                        map.putArray("categories", catArray);
-                    }
-                    
-                    if (offer.getPromotion() != null) {
-                        map.putMap("promotion", mapPromotion(offer.getPromotion()));
-                    }
-                    
-                    if (offer.getStandardGoals() != null && !offer.getStandardGoals().isEmpty()) {
-                        WritableArray goalsArray = Arguments.createArray();
-                        for (InBrainOfferGoal goal : offer.getStandardGoals()) {
-                            goalsArray.pushMap(mapGoal(goal));
-                        }
-                        map.putArray("standardGoals", goalsArray);
-                    }
-                    
-                    if (offer.getPurchaseGoals() != null && !offer.getPurchaseGoals().isEmpty()) {
-                        WritableArray goalsArray = Arguments.createArray();
-                        for (InBrainOfferGoal goal : offer.getPurchaseGoals()) {
-                            goalsArray.pushMap(mapGoal(goal));
-                        }
-                        map.putArray("purchaseGoals", goalsArray);
-                    }
-                    
-                    array.pushMap(map);
+                    array.pushMap(mapOffer(offer));
                 }
                 
                 promise.resolve(array);
@@ -448,12 +399,7 @@ public class InBrainSurveysModule extends ReactContextBaseJavaModule implements 
                     return;
                 }
 
-                WritableMap currencySaleForJS = Arguments.createMap();
-                currencySaleForJS.putString("title", currencySale.description);
-                currencySaleForJS.putDouble("multiplier", currencySale.multiplier);
-                currencySaleForJS.putString("startOn", formatCurrencySaleDate(currencySale.startOn));
-                currencySaleForJS.putString("endOn", formatCurrencySaleDate(currencySale.endOn));
-                promise.resolve(currencySaleForJS);
+                promise.resolve(mapCurrencySale(currencySale));
             }
         });
     }
@@ -547,6 +493,90 @@ public class InBrainSurveysModule extends ReactContextBaseJavaModule implements 
         }
     }
     
+    /**
+     * Map InBrainNativeOffer to WritableMap for React Native
+     */
+    private WritableMap mapOffer(InBrainNativeOffer offer) {
+        WritableMap map = Arguments.createMap();
+
+        map.putInt("id", offer.getId());
+        map.putString("title", offer.getTitle());
+        map.putDouble("reward", offer.getReward());
+        map.putString("rewardString", offer.getRewardString());
+        map.putInt("featuredRank", offer.getFeaturedRank());
+        map.putInt("attributionWindowMinutes", offer.getAttributionWindowMinutes());
+
+        if (offer.getThumbnailUrl() != null) {
+            map.putString("thumbnailUrl", offer.getThumbnailUrl());
+        }
+        if (offer.getHeroImageUrl() != null) {
+            map.putString("heroImageUrl", offer.getHeroImageUrl());
+        }
+        putStringArray(map, "offerDescription", offer.getDescription());
+        putStringArray(map, "instructions", offer.getInstructions());
+        putStringArray(map, "requirements", offer.getRequirements());
+        putStringArray(map, "tags", offer.getTags());
+        putStringArray(map, "categories", offer.getCategories());
+
+        if (offer.getAttemptedAt() != null) {
+            map.putString("attemptedAt", dateFormatter.format(offer.getAttemptedAt()));
+        }
+        if (offer.getCompleteBy() != null) {
+            map.putString("completeBy", dateFormatter.format(offer.getCompleteBy()));
+        }
+
+        if (offer.getPromotion() != null) {
+            map.putMap("promotion", mapPromotion(offer.getPromotion()));
+        }
+
+        if (offer.getCampaignCurrencySale() != null) {
+            map.putMap("campaignCurrencySale", mapCurrencySale(offer.getCampaignCurrencySale()));
+        }
+
+        if (offer.getStandardGoals() != null && !offer.getStandardGoals().isEmpty()) {
+            WritableArray goalsArray = Arguments.createArray();
+            for (InBrainOfferGoal goal : offer.getStandardGoals()) {
+                goalsArray.pushMap(mapGoal(goal));
+            }
+            map.putArray("standardGoals", goalsArray);
+        }
+
+        if (offer.getPurchaseGoals() != null && !offer.getPurchaseGoals().isEmpty()) {
+            WritableArray goalsArray = Arguments.createArray();
+            for (InBrainOfferGoal goal : offer.getPurchaseGoals()) {
+                goalsArray.pushMap(mapGoal(goal));
+            }
+            map.putArray("purchaseGoals", goalsArray);
+        }
+
+        return map;
+    }
+
+    /**
+     * Map a list of strings to a WritableArray and put it on the map when non-empty
+     */
+    private void putStringArray(WritableMap map, String key, List<String> values) {
+        if (values != null && !values.isEmpty()) {
+            WritableArray array = Arguments.createArray();
+            for (String value : values) {
+                array.pushString(value);
+            }
+            map.putArray(key, array);
+        }
+    }
+
+    /**
+     * Map CurrencySale to WritableMap for React Native
+     */
+    private WritableMap mapCurrencySale(CurrencySale currencySale) {
+        WritableMap currencySaleMap = Arguments.createMap();
+        currencySaleMap.putString("title", currencySale.description);
+        currencySaleMap.putDouble("multiplier", currencySale.multiplier);
+        currencySaleMap.putString("startOn", formatCurrencySaleDate(currencySale.startOn));
+        currencySaleMap.putString("endOn", formatCurrencySaleDate(currencySale.endOn));
+        return currencySaleMap;
+    }
+
     /**
      * Map InBrainOfferGoal to WritableMap for React Native
      */
