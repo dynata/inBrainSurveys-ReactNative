@@ -181,45 +181,7 @@ RCT_EXPORT_METHOD(getNativeOffers:(NSDictionary * _Nullable)filterDict
         NSMutableArray *offerList = [NSMutableArray array];
 
         for(int i = 0; i < offers.count; i++) {
-            InBrainNativeOffer *offer = offers[i];
-            
-            NSMutableDictionary *offerDict = [NSMutableDictionary dictionary];
-            offerDict[@"id"] = [NSNumber numberWithInt: offer.id];
-            offerDict[@"title"] = offer.title;
-            offerDict[@"reward"] = [NSNumber numberWithDouble: offer.reward];
-            offerDict[@"rewardString"] = offer.rewardString;
-            offerDict[@"featuredRank"] = [NSNumber numberWithInt: offer.featuredRank];
-            
-            if(offer.thumbnailUrl) offerDict[@"thumbnailUrl"] = offer.thumbnailUrl;
-            if(offer.heroImageUrl) offerDict[@"heroImageUrl"] = offer.heroImageUrl;
-            if(offer.offerDescription) offerDict[@"offerDescription"] = offer.offerDescription;
-            if(offer.categories) offerDict[@"categories"] = offer.categories;
-            
-            if(offer.promotion) {
-                offerDict[@"promotion"] = @{
-                    @"multiplier": [NSNumber numberWithDouble: offer.promotion.multiplier],
-                    @"originalReward": [NSNumber numberWithDouble: offer.promotion.originalReward],
-                    @"originalRewardString": offer.promotion.originalRewardString
-                };
-            }
-            
-            if(offer.standardGoals && offer.standardGoals.count > 0) {
-                NSMutableArray *standardGoalsList = [NSMutableArray array];
-                for(InBrainOfferGoal *goal in offer.standardGoals) {
-                    [standardGoalsList addObject:[self mapGoal:goal]];
-                }
-                offerDict[@"standardGoals"] = standardGoalsList;
-            }
-            
-            if(offer.purchaseGoals && offer.purchaseGoals.count > 0) {
-                NSMutableArray *purchaseGoalsList = [NSMutableArray array];
-                for(InBrainOfferGoal *goal in offer.purchaseGoals) {
-                    [purchaseGoalsList addObject:[self mapGoal:goal]];
-                }
-                offerDict[@"purchaseGoals"] = purchaseGoalsList;
-            }
-            
-            [offerList addObject:offerDict];
+            [offerList addObject:[self mapOffer:offers[i]]];
         }
 
         resolve(offerList);
@@ -308,12 +270,7 @@ RCT_EXPORT_METHOD(getCurrencySale: (RCTPromiseResolveBlock)resolve rejecter:(RCT
             return;
         }
        
-        NSObject* currencySaleForRN = @{ @"title": currencySale.title,
-                         @"multiplier": [NSNumber numberWithDouble:currencySale.multiplier],
-                         @"startOn": [_dateFormatter stringFromDate:currencySale.startOn],
-                         @"endOn": [_dateFormatter stringFromDate:currencySale.endOn],
-        };
-        resolve(currencySaleForRN);
+        resolve([self mapCurrencySale:currencySale]);
 
     } failed:^(NSError * failed){
         reject(@"ERR_GET_CURRENY_SALE", failed.localizedDescription, failed);
@@ -368,6 +325,83 @@ RCT_EXPORT_METHOD(getCurrencySale: (RCTPromiseResolveBlock)resolve rejecter:(RCT
 // ***************************
 
 /**
+ * Map InBrainNativeOffer to NSDictionary for React Native
+ */
+- (NSDictionary *)mapOffer:(InBrainNativeOffer *)offer {
+    NSMutableDictionary *offerDict = [NSMutableDictionary dictionary];
+    offerDict[@"id"] = [NSNumber numberWithInteger: offer.id];
+    offerDict[@"title"] = offer.title;
+    offerDict[@"reward"] = [NSNumber numberWithDouble: offer.reward];
+    offerDict[@"rewardString"] = offer.rewardString;
+    offerDict[@"featuredRank"] = [NSNumber numberWithInteger: offer.featuredRank];
+    offerDict[@"attributionWindowMinutes"] = [NSNumber numberWithInteger: offer.attributionWindowMinutes];
+    
+    if(offer.thumbnailUrl) offerDict[@"thumbnailUrl"] = offer.thumbnailUrl;
+    if(offer.heroImageUrl) offerDict[@"heroImageUrl"] = offer.heroImageUrl;
+    if(offer.offerDescription) offerDict[@"offerDescription"] = offer.offerDescription;
+    if(offer.instructions) offerDict[@"instructions"] = offer.instructions;
+    if(offer.requirements) offerDict[@"requirements"] = offer.requirements;
+    if(offer.tags) offerDict[@"tags"] = offer.tags;
+    if(offer.categories) offerDict[@"categories"] = offer.categories;
+    
+    if(offer.attemptedAt) {
+        offerDict[@"attemptedAt"] = [_dateFormatter stringFromDate:offer.attemptedAt];
+    }
+    if(offer.completeBy) {
+        offerDict[@"completeBy"] = [_dateFormatter stringFromDate:offer.completeBy];
+    }
+    
+    if(offer.promotion) {
+        offerDict[@"promotion"] = [self mapPromotion:offer.promotion];
+    }
+    
+    if(offer.campaignCurrencySale) {
+        offerDict[@"campaignCurrencySale"] = [self mapCurrencySale:offer.campaignCurrencySale];
+    }
+    
+    if(offer.standardGoals && offer.standardGoals.count > 0) {
+        NSMutableArray *standardGoalsList = [NSMutableArray array];
+        for(InBrainOfferGoal *goal in offer.standardGoals) {
+            [standardGoalsList addObject:[self mapGoal:goal]];
+        }
+        offerDict[@"standardGoals"] = standardGoalsList;
+    }
+    
+    if(offer.purchaseGoals && offer.purchaseGoals.count > 0) {
+        NSMutableArray *purchaseGoalsList = [NSMutableArray array];
+        for(InBrainOfferGoal *goal in offer.purchaseGoals) {
+            [purchaseGoalsList addObject:[self mapGoal:goal]];
+        }
+        offerDict[@"purchaseGoals"] = purchaseGoalsList;
+    }
+    
+    return offerDict;
+}
+
+/**
+ * Map InBrainOfferPromotion to NSDictionary for React Native
+ */
+- (NSDictionary *)mapPromotion:(InBrainOfferPromotion *)promotion {
+    return @{
+        @"multiplier": [NSNumber numberWithDouble: promotion.multiplier],
+        @"originalReward": [NSNumber numberWithDouble: promotion.originalReward],
+        @"originalRewardString": promotion.originalRewardString
+    };
+}
+
+/**
+ * Map InBrainCurrencySale to NSDictionary for React Native
+ */
+- (NSDictionary *)mapCurrencySale:(InBrainCurrencySale *)currencySale {
+    return @{
+        @"title": currencySale.title,
+        @"multiplier": [NSNumber numberWithDouble:currencySale.multiplier],
+        @"startOn": [_dateFormatter stringFromDate:currencySale.startOn],
+        @"endOn": [_dateFormatter stringFromDate:currencySale.endOn],
+    };
+}
+
+/**
  * Map InBrainOfferGoal to NSDictionary for React Native
  */
 - (NSDictionary *)mapGoal:(InBrainOfferGoal *)goal {
@@ -386,11 +420,7 @@ RCT_EXPORT_METHOD(getCurrencySale: (RCTPromiseResolveBlock)resolve rejecter:(RCT
     }
     
     if(goal.promotion) {
-        goalDict[@"promotion"] = @{
-            @"multiplier": [NSNumber numberWithDouble: goal.promotion.multiplier],
-            @"originalReward": [NSNumber numberWithDouble: goal.promotion.originalReward],
-            @"originalRewardString": goal.promotion.originalRewardString
-        };
+        goalDict[@"promotion"] = [self mapPromotion:goal.promotion];
     }
     
     return goalDict;

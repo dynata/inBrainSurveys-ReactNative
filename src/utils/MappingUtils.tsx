@@ -49,27 +49,32 @@ export const mapOffers = (
   nativeOffers: Array<[string: any]>
 ): InBrainNativeOffer[] => {
   return nativeOffers.map((offer: any) => {
-    // Convert completeBy string to Date if present in goals
+    offer.attemptedAt = toDate(offer.attemptedAt)
+    offer.completeBy = toDate(offer.completeBy)
+
+    if (offer.campaignCurrencySale) {
+      offer.campaignCurrencySale = mapCurrencySale(offer.campaignCurrencySale)
+    }
+
     if (offer.standardGoals) {
-      offer.standardGoals = offer.standardGoals.map((goal: any) => {
-        if (goal.completeBy) {
-          goal.completeBy = new Date(goal.completeBy)
-        }
-        return goal
-      })
+      offer.standardGoals = offer.standardGoals.map(mapGoalDates)
     }
 
     if (offer.purchaseGoals) {
-      offer.purchaseGoals = offer.purchaseGoals.map((goal: any) => {
-        if (goal.completeBy) {
-          goal.completeBy = new Date(goal.completeBy)
-        }
-        return goal
-      })
+      offer.purchaseGoals = offer.purchaseGoals.map(mapGoalDates)
     }
 
     return offer
   })
+}
+
+const toDate = (value: any): Date | undefined => {
+  return value ? new Date(value) : undefined
+}
+
+const mapGoalDates = (goal: any) => {
+  goal.completeBy = toDate(goal.completeBy)
+  return goal
 }
 
 // Map Currency Sale
