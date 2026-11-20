@@ -1,5 +1,6 @@
 import { InBrainOfferPromotion } from './InBrainOfferPromotion'
 import { InBrainOfferGoal } from './InBrainOfferGoal'
+import { InBrainOfferBannerAd } from './InBrainOfferBannerAd'
 import { InBrainCurrencySale } from '../InBrainCurrencySale'
 
 /**
@@ -22,6 +23,10 @@ export type InBrainNativeOffer = {
   requirements?: string[]
   tags?: string[]
   categories?: string[]
+  /**
+   * Supported device form factors (e.g. `"Phone"`, `"Tablet"`).
+   */
+  platforms?: string[]
   promotion?: InBrainOfferPromotion
   standardGoals?: InBrainOfferGoal[]
   purchaseGoals?: InBrainOfferGoal[]
@@ -41,4 +46,13 @@ export type InBrainNativeOffer = {
    */
   completeBy?: Date
   campaignCurrencySale?: InBrainCurrencySale
+  bannerAd?: InBrainOfferBannerAd
+  /**
+   * Current offer status (e.g. `"Open"`, `"Closed"`).
+   */
+  status?: string
+  /**
+   * Indicates whether the offer has been completed.
+   */
+  isCompleted: boolean
 }
