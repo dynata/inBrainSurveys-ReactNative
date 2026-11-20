@@ -36,8 +36,10 @@ import com.inbrain.sdk.model.SurveyCategory;
 import com.inbrain.sdk.model.SurveyFilter;
 import com.inbrain.sdk.model.InBrainSurveyReward;
 import com.inbrain.sdk.model.CurrencySale;
+import com.inbrain.sdk.model.CurrencySaleType;
 import com.inbrain.sdk.model.WallOption;
 import com.inbrain.sdk.model.offers.InBrainNativeOffer;
+import com.inbrain.sdk.model.offers.InBrainOfferBannerAd;
 import com.inbrain.sdk.model.offers.InBrainOfferFilter;
 import com.inbrain.sdk.model.offers.InBrainOfferType;
 import com.inbrain.sdk.model.offers.InBrainOfferGoal;
@@ -389,8 +391,9 @@ public class InBrainSurveysModule extends ReactContextBaseJavaModule implements 
     // ***** GET CURRENCY SALE **** 
     // ****************************
     @ReactMethod
-    public void getCurrencySale(final Promise promise) {
-        InBrain.getInstance().getCurrencySale(new GetCurrencySaleCallback() {
+    public void getCurrencySale(final int type, final Promise promise) {
+        CurrencySaleType saleType = getCurrencySaleTypeFromRaw(type);
+        InBrain.getInstance().getCurrencySale(saleType, new GetCurrencySaleCallback() {
             @Override
             public void currencySaleReceived(CurrencySale currencySale) {
 
@@ -478,6 +481,19 @@ public class InBrainSurveysModule extends ReactContextBaseJavaModule implements 
     }
     
     /**
+     * Convert raw integer to CurrencySaleType enum
+     */
+    private CurrencySaleType getCurrencySaleTypeFromRaw(int raw) {
+        switch (raw) {
+            case 1:
+                return CurrencySaleType.OFFERS;
+            case 0:
+            default:
+                return CurrencySaleType.SURVEYS;
+        }
+    }
+
+    /**
      * Convert raw integer to InBrainOfferType enum
      */
     private InBrainOfferType getOfferTypeFromRaw(int raw) {
@@ -505,6 +521,7 @@ public class InBrainSurveysModule extends ReactContextBaseJavaModule implements 
         map.putString("rewardString", offer.getRewardString());
         map.putInt("featuredRank", offer.getFeaturedRank());
         map.putInt("attributionWindowMinutes", offer.getAttributionWindowMinutes());
+        map.putBoolean("isCompleted", offer.isCompleted());
 
         if (offer.getThumbnailUrl() != null) {
             map.putString("thumbnailUrl", offer.getThumbnailUrl());
@@ -512,11 +529,15 @@ public class InBrainSurveysModule extends ReactContextBaseJavaModule implements 
         if (offer.getHeroImageUrl() != null) {
             map.putString("heroImageUrl", offer.getHeroImageUrl());
         }
+        if (offer.getStatus() != null) {
+            map.putString("status", offer.getStatus());
+        }
         putStringArray(map, "offerDescription", offer.getDescription());
         putStringArray(map, "instructions", offer.getInstructions());
         putStringArray(map, "requirements", offer.getRequirements());
         putStringArray(map, "tags", offer.getTags());
         putStringArray(map, "categories", offer.getCategories());
+        putStringArray(map, "platforms", offer.getPlatforms());
 
         if (offer.getAttemptedAt() != null) {
             map.putString("attemptedAt", dateFormatter.format(offer.getAttemptedAt()));
@@ -531,6 +552,10 @@ public class InBrainSurveysModule extends ReactContextBaseJavaModule implements 
 
         if (offer.getCampaignCurrencySale() != null) {
             map.putMap("campaignCurrencySale", mapCurrencySale(offer.getCampaignCurrencySale()));
+        }
+
+        if (offer.getBannerAd() != null) {
+            map.putMap("bannerAd", mapBannerAd(offer.getBannerAd()));
         }
 
         if (offer.getStandardGoals() != null && !offer.getStandardGoals().isEmpty()) {
@@ -588,6 +613,7 @@ public class InBrainSurveysModule extends ReactContextBaseJavaModule implements 
         goalMap.putDouble("reward", goal.getReward());
         goalMap.putString("rewardString", goal.getRewardString());
         goalMap.putBoolean("isCompleted", goal.isCompleted());
+        goalMap.putBoolean("isPending", goal.isPending());
         goalMap.putInt("sortOrder", goal.getSortOrder());
         goalMap.putInt("attributionWindowMinutes", goal.getAttributionWindowMinutes());
         
@@ -600,6 +626,25 @@ public class InBrainSurveysModule extends ReactContextBaseJavaModule implements 
         }
         
         return goalMap;
+    }
+
+    /**
+     * Map InBrainOfferBannerAd to WritableMap for React Native
+     */
+    private WritableMap mapBannerAd(InBrainOfferBannerAd bannerAd) {
+        WritableMap bannerAdMap = Arguments.createMap();
+
+        if (bannerAd.getHeader() != null) {
+            bannerAdMap.putString("header", bannerAd.getHeader());
+        }
+        if (bannerAd.getButtonText() != null) {
+            bannerAdMap.putString("buttonText", bannerAd.getButtonText());
+        }
+        if (bannerAd.getDescription() != null) {
+            bannerAdMap.putString("bannerDescription", bannerAd.getDescription());
+        }
+
+        return bannerAdMap;
     }
     
     /**

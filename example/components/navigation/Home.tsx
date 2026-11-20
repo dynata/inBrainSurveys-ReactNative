@@ -1,6 +1,13 @@
-import React, {useState, useEffect} from 'react';
-import {StyleSheet, Text, View, SafeAreaView, Image} from 'react-native';
-import {NavigationProp} from '@react-navigation/native';
+import React, {useState, useEffect, useCallback, useRef} from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  SafeAreaView,
+  Image,
+  Animated,
+} from 'react-native';
+import {NavigationProp, useFocusEffect} from '@react-navigation/native';
 import ActionList from '../ActionList';
 import {useInbrain} from '../context/InbrainContext';
 import {ActivityWithOverlay, ToastNotify} from '../common';
@@ -10,6 +17,8 @@ import {
   OnCloseSurveysData,
   InBrainReward,
   InBrainWallOption,
+  InBrainCurrencySale,
+  InBrainCurrencySaleType,
 } from 'inbrain-surveys';
 
 interface RouterProps {
@@ -21,6 +30,59 @@ const Home = ({navigation}: RouterProps) => {
   const {reward, setReward} = useReward();
   const [notifyMsg, setNotifyMsg] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [currencySale, setCurrencySale] = useState<
+    InBrainCurrencySale | undefined
+  >(undefined);
+  const saleOpacity = useRef(new Animated.Value(0)).current;
+
+  const showCurrencySale = useCallback(
+    (sale: InBrainCurrencySale | undefined) => {
+      if (sale) {
+        setCurrencySale(sale);
+      }
+
+      Animated.timing(saleOpacity, {
+        toValue: sale ? 1 : 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(({finished}) => {
+        if (finished && !sale) {
+          setCurrencySale(undefined);
+        }
+      });
+    },
+    [saleOpacity],
+  );
+
+  const fetchCurrencySale = useCallback(
+    (isActiveCheck?: () => boolean) => {
+      inbrain
+        ?.getCurrencySale(InBrainCurrencySaleType.surveys)
+        .then((sale: InBrainCurrencySale | undefined) => {
+          if (!isActiveCheck || isActiveCheck()) {
+            showCurrencySale(sale);
+          }
+        })
+        .catch((err: Error) => {
+          console.log('[getCurrencySale ERROR]', err);
+          if (!isActiveCheck || isActiveCheck()) {
+            showCurrencySale(undefined);
+          }
+        });
+    },
+    [inbrain, showCurrencySale],
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+      fetchCurrencySale(() => isActive);
+
+      return () => {
+        isActive = false;
+      };
+    }, [fetchCurrencySale]),
+  );
 
   useEffect(() => {
     /**
@@ -31,13 +93,14 @@ const Home = ({navigation}: RouterProps) => {
         console.log('[setOnSurveysCloseLister SUCCESS] => ');
         console.log('[Close by WebView => ]', event.byWebView);
         getRewards();
+        fetchCurrencySale();
       },
     );
 
     return () => {
       subscription?.remove();
     };
-  }, [reward]);
+  }, [reward, fetchCurrencySale]);
 
   /**
    * How to call inbrain.getRewards()
@@ -80,9 +143,26 @@ const Home = ({navigation}: RouterProps) => {
       });
   };
 
+  const multiplierText = currencySale
+    ? `${Math.round(currencySale.multiplier * 10) / 10}x`
+    : '';
+
   return (
     <SafeAreaView style={styles.container}>
       <ToastNotify message={notifyMsg} callBack={() => setNotifyMsg('')} />
+      <View style={styles.currencySaleContainer}>
+        <Animated.View
+          style={[styles.currencySaleBadge, {opacity: saleOpacity}]}>
+          {currencySale && (
+            <Text style={styles.currencySaleText}>
+              <Text style={styles.currencySaleMultiplier}>
+                {multiplierText}
+              </Text>
+              {' Earnings'}
+            </Text>
+          )}
+        </Animated.View>
+      </View>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>inBrain Surveys</Text>
         <Text style={styles.appSubtitle}>Example App</Text>
@@ -119,8 +199,32 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     flex: 1,
   },
+  currencySaleContainer: {
+    paddingTop: 4,
+    paddingHorizontal: 12,
+    minHeight: 34,
+    alignItems: 'flex-end',
+  },
+  currencySaleBadge: {
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#DE8344',
+    paddingHorizontal: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  currencySaleText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  currencySaleMultiplier: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
   titleContainer: {
-    marginTop: 15,
+    marginTop: 2,
   },
   title: {
     fontSize: 30,

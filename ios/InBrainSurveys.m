@@ -263,8 +263,14 @@ RCT_EXPORT_METHOD(setStatusBarLight:(BOOL)lightStatusBar) {
 // ****************************
 // ***** GET CURRENCY SALE ****
 // ****************************
-RCT_EXPORT_METHOD(getCurrencySale: (RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
-    [_inbrain getCurrencySaleWithSuccess:^(InBrainCurrencySale * currencySale) {
+RCT_EXPORT_METHOD(getCurrencySale:(NSInteger)type
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    InBrainCurrencySaleType saleType = (type == InBrainCurrencySaleTypeOffers)
+        ? InBrainCurrencySaleTypeOffers
+        : InBrainCurrencySaleTypeSurveys;
+
+    [_inbrain getCurrencySaleFor:saleType success:^(InBrainCurrencySale * currencySale) {
         if(!currencySale) {
             resolve(nil);
             return;
@@ -335,6 +341,7 @@ RCT_EXPORT_METHOD(getCurrencySale: (RCTPromiseResolveBlock)resolve rejecter:(RCT
     offerDict[@"rewardString"] = offer.rewardString;
     offerDict[@"featuredRank"] = [NSNumber numberWithInteger: offer.featuredRank];
     offerDict[@"attributionWindowMinutes"] = [NSNumber numberWithInteger: offer.attributionWindowMinutes];
+    offerDict[@"isCompleted"] = [NSNumber numberWithBool: offer.isCompleted];
     
     if(offer.thumbnailUrl) offerDict[@"thumbnailUrl"] = offer.thumbnailUrl;
     if(offer.heroImageUrl) offerDict[@"heroImageUrl"] = offer.heroImageUrl;
@@ -343,6 +350,8 @@ RCT_EXPORT_METHOD(getCurrencySale: (RCTPromiseResolveBlock)resolve rejecter:(RCT
     if(offer.requirements) offerDict[@"requirements"] = offer.requirements;
     if(offer.tags) offerDict[@"tags"] = offer.tags;
     if(offer.categories) offerDict[@"categories"] = offer.categories;
+    if(offer.platforms) offerDict[@"platforms"] = offer.platforms;
+    if(offer.status) offerDict[@"status"] = offer.status;
     
     if(offer.attemptedAt) {
         offerDict[@"attemptedAt"] = [_dateFormatter stringFromDate:offer.attemptedAt];
@@ -357,6 +366,10 @@ RCT_EXPORT_METHOD(getCurrencySale: (RCTPromiseResolveBlock)resolve rejecter:(RCT
     
     if(offer.campaignCurrencySale) {
         offerDict[@"campaignCurrencySale"] = [self mapCurrencySale:offer.campaignCurrencySale];
+    }
+    
+    if(offer.bannerAd) {
+        offerDict[@"bannerAd"] = [self mapBannerAd:offer.bannerAd];
     }
     
     if(offer.standardGoals && offer.standardGoals.count > 0) {
@@ -412,6 +425,7 @@ RCT_EXPORT_METHOD(getCurrencySale: (RCTPromiseResolveBlock)resolve rejecter:(RCT
     goalDict[@"reward"] = [NSNumber numberWithDouble: goal.reward];
     goalDict[@"rewardString"] = goal.rewardString;
     goalDict[@"isCompleted"] = [NSNumber numberWithBool: goal.isCompleted];
+    goalDict[@"isPending"] = [NSNumber numberWithBool: goal.isPending];
     goalDict[@"sortOrder"] = [NSNumber numberWithInt: goal.sortOrder];
     goalDict[@"attributionWindowMinutes"] = [NSNumber numberWithInt: goal.attributionWindowMinutes];
     
@@ -424,6 +438,17 @@ RCT_EXPORT_METHOD(getCurrencySale: (RCTPromiseResolveBlock)resolve rejecter:(RCT
     }
     
     return goalDict;
+}
+
+/**
+ * Map InBrainOfferBannerAd to NSDictionary for React Native
+ */
+- (NSDictionary *)mapBannerAd:(InBrainOfferBannerAd *)bannerAd {
+    NSMutableDictionary *bannerAdDict = [NSMutableDictionary dictionary];
+    if(bannerAd.header) bannerAdDict[@"header"] = bannerAd.header;
+    if(bannerAd.buttonText) bannerAdDict[@"buttonText"] = bannerAd.buttonText;
+    if(bannerAd.bannerDescription) bannerAdDict[@"bannerDescription"] = bannerAd.bannerDescription;
+    return bannerAdDict;
 }
 
 /**

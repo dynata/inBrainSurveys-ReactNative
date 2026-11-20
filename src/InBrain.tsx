@@ -26,6 +26,7 @@ import {
   InBrainOfferFilter,
   OnCloseSurveysData,
   InBrainCurrencySale,
+  InBrainCurrencySaleType,
   InBrainWallOption,
 } from './models'
 
@@ -124,14 +125,25 @@ const confirmRewards = (rewards: InBrainReward[]) =>
   wrapPromise<void>(() => InBrainSurveys.confirmRewards(rewards))
 
 /**
- * Get Currency Sale
+ * @deprecated Use `getCurrencySale(type)` instead
  */
-const getCurrencySale = () =>
-  wrapPromise<InBrainCurrencySale | undefined>(() => {
-    return InBrainSurveys.getCurrencySale().then((sale: any) => {
+function getCurrencySale(): Promise<InBrainCurrencySale | undefined>
+/**
+ * Get Currency Sale
+ * @param type Type of Currency Sale to fetch (`surveys` or `offers`)
+ */
+function getCurrencySale(
+  type: InBrainCurrencySaleType
+): Promise<InBrainCurrencySale | undefined>
+function getCurrencySale(
+  type: InBrainCurrencySaleType = InBrainCurrencySaleType.surveys
+) {
+  return wrapPromise<InBrainCurrencySale | undefined>(() => {
+    return InBrainSurveys.getCurrencySale(type).then((sale: any) => {
       return mapCurrencySale(sale)
     })
   })
+}
 
 /**
  * Set the listener when the webview is dismissed or webview is dismissed from within the webview

@@ -11,6 +11,10 @@ export type InBrainOfferGoal = {
   rewardString: string
   isCompleted: boolean
   /**
+   * Indicates whether the goal reward is currently pending.
+   */
+  isPending: boolean
+  /**
    * The display order of the goal. Always `-1` if not specified.
    */
   sortOrder: number
