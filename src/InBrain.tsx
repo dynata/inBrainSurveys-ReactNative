@@ -125,25 +125,15 @@ const confirmRewards = (rewards: InBrainReward[]) =>
   wrapPromise<void>(() => InBrainSurveys.confirmRewards(rewards))
 
 /**
- * @deprecated Use `getCurrencySale(type)` instead
- */
-function getCurrencySale(): Promise<InBrainCurrencySale | undefined>
-/**
  * Get Currency Sale
  * @param type Type of Currency Sale to fetch (`surveys` or `offers`)
  */
-function getCurrencySale(
-  type: InBrainCurrencySaleType
-): Promise<InBrainCurrencySale | undefined>
-function getCurrencySale(
-  type: InBrainCurrencySaleType = InBrainCurrencySaleType.surveys
-) {
-  return wrapPromise<InBrainCurrencySale | undefined>(() => {
-    return InBrainSurveys.getCurrencySale(type).then((sale: any) => {
-      return mapCurrencySale(sale)
-    })
-  })
-}
+const getCurrencySaleFor = (type: InBrainCurrencySaleType) =>
+  wrapPromise<InBrainCurrencySale | undefined>(() =>
+    InBrainSurveys.getCurrencySale(type).then((sale: any) =>
+      mapCurrencySale(sale)
+    )
+  )
 
 /**
  * Set the listener when the webview is dismissed or webview is dismissed from within the webview
@@ -239,6 +229,12 @@ const showNativeSurvey = (
 ) => {
   return openSurvey(id, searchId, offersEnabled)
 }
+
+/**
+ * @deprecated Use getCurrencySaleFor() instead
+ */
+const getCurrencySale = () =>
+  getCurrencySaleFor(InBrainCurrencySaleType.surveys)
 // ----------------------- Unsupported -------------------------------
 
 /**
@@ -291,6 +287,7 @@ export default {
   getNativeOffers,
   openOfferWith,
   getCurrencySale,
+  getCurrencySaleFor,
 
   getRewards,
   confirmRewards,

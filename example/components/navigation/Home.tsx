@@ -57,7 +57,7 @@ const Home = ({navigation}: RouterProps) => {
   const fetchCurrencySale = useCallback(
     (isActiveCheck?: () => boolean) => {
       inbrain
-        ?.getCurrencySale(InBrainCurrencySaleType.surveys)
+        ?.getCurrencySaleFor(InBrainCurrencySaleType.surveys)
         .then((sale: InBrainCurrencySale | undefined) => {
           if (!isActiveCheck || isActiveCheck()) {
             showCurrencySale(sale);

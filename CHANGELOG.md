@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - New `InBrainOfferGoal` field: `isPending`
 - **Currency Sale:**
   - `InBrainCurrencySaleType` - enum to specify the currency sale type (`surveys` or `offers`)
-  - `getCurrencySale(type)` overload to `InBrain` for fetching Surveys or Offers currency sale
+  - `getCurrencySaleFor(type)` function to `InBrain` for fetching Surveys or Offers currency sale
 
 ### Changed
 - Vendored `InBrainSurveys.xcframework` directly in the package for iOS
@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Updated native Android SDK to 3.2.0
 
 ### Deprecated
-- `getCurrencySale()` method in favor of `getCurrencySale(type)`
+- `getCurrencySale()` method in favor of `getCurrencySaleFor(type)`
 
 ## [3.3.3](https://github.com/dynata/inBrainSurveys-ReactNative/releases/tag/3.3.3) - 2026-09-01
 

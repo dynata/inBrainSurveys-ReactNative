@@ -48,13 +48,13 @@ type InbrainContextType = {
   setOnCloseListener: (callback: () => void) => void;
   setOnCloseListenerFromPage: (callback: () => void) => void;
   openWall: (option?: InBrainWallOption) => Promise<void>;
-  getCurrencySale: {
-    /**
-     * @deprecated Use `getCurrencySale(type)` instead
-     */
-    (): Promise<InBrainCurrencySale | undefined>;
-    (type: InBrainCurrencySaleType): Promise<InBrainCurrencySale | undefined>;
-  };
+  /**
+   * @deprecated Use `getCurrencySaleFor(type)` instead
+   */
+  getCurrencySale: () => Promise<InBrainCurrencySale | undefined>;
+  getCurrencySaleFor: (
+    type: InBrainCurrencySaleType,
+  ) => Promise<InBrainCurrencySale | undefined>;
 };
 
 export const InbrainContext = createContext<InbrainContextType | null>(null);
