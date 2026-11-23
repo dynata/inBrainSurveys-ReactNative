@@ -5,6 +5,25 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [3.4.0](https://github.com/dynata/inBrainSurveys-ReactNative/releases/tag/3.4.0) - 2026-11-23
+
+### Added
+- **Native Offers:**
+  - `InBrainOfferBannerAd` - type representing an offer banner ad (`header`, `buttonText`, `bannerDescription`)
+  - New `InBrainNativeOffer` fields: `bannerAd`, `status`, `isCompleted`, `platforms`
+  - New `InBrainOfferGoal` field: `isPending`
+- **Currency Sale:**
+  - `InBrainCurrencySaleType` - enum to specify the currency sale type (`surveys` or `offers`)
+  - `getCurrencySaleFor(type)` function to `InBrain` for fetching Surveys or Offers currency sale
+
+### Changed
+- Vendored `InBrainSurveys.xcframework` directly in the package for iOS
+- Updated native iOS SDK to 3.1.0
+- Updated native Android SDK to 3.2.0
+
+### Deprecated
+- `getCurrencySale()` method in favor of `getCurrencySaleFor(type)`
+
 ## [3.3.3](https://github.com/dynata/inBrainSurveys-ReactNative/releases/tag/3.3.3) - 2026-09-01
 
 ### Added

@@ -7,6 +7,7 @@ import config from './inbrain-config';
 
 const App = () => {
   const [reward, setReward] = useState(0);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     //You need set up your CLIENT_ID, CLIENT_SECRET and USER_ID first
@@ -40,12 +41,13 @@ const App = () => {
     };
 
     inbrain.setNavigationBarConfig(navigationBarConfig);
+    setIsInitialized(true);
   }, []);
 
   return (
     <InbrainContext.Provider value={inbrain}>
       <RewardContext.Provider value={{reward, setReward}}>
-        <Navigator />
+        {isInitialized ? <Navigator /> : null}
       </RewardContext.Provider>
     </InbrainContext.Provider>
   );

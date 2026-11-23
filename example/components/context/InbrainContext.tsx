@@ -12,6 +12,7 @@ import {
   InBrainOfferFilter,
   InBrainNativeOffer,
   InBrainCurrencySale,
+  InBrainCurrencySaleType,
 } from 'inbrain-surveys';
 
 type InbrainContextType = {
@@ -47,7 +48,13 @@ type InbrainContextType = {
   setOnCloseListener: (callback: () => void) => void;
   setOnCloseListenerFromPage: (callback: () => void) => void;
   openWall: (option?: InBrainWallOption) => Promise<void>;
+  /**
+   * @deprecated Use `getCurrencySaleFor(type)` instead
+   */
   getCurrencySale: () => Promise<InBrainCurrencySale | undefined>;
+  getCurrencySaleFor: (
+    type: InBrainCurrencySaleType,
+  ) => Promise<InBrainCurrencySale | undefined>;
 };
 
 export const InbrainContext = createContext<InbrainContextType | null>(null);
