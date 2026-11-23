@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## [3.4.0](https://github.com/dynata/inBrainSurveys-ReactNative/releases/tag/3.4.0) - 2026-11-20
+## [3.4.0](https://github.com/dynata/inBrainSurveys-ReactNative/releases/tag/3.4.0) - 2026-11-23
 
 ### Added
 - **Native Offers:**
