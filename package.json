@@ -1,7 +1,7 @@
 {
   "name": "inbrain-surveys",
   "title": "Inbrain Survey",
-  "version": "3.4.0",
+  "version": "3.4.1",
   "description": "In-App monetization via surveys, powered by inBrain.ai.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -11,6 +11,7 @@
     "watch": "./node_modules/typescript/bin/tsc -w",
     "clean": "rm -rf lib/ && cd ios && rm -rf build && cd .. && cd android && ./gradlew clean && rm -rf android/.idea && cd ..",
     "prepare": "npm run clean && npm run build",
+    "pack:xcframework": "cd ios && rm -f InBrainSurveys.xcframework.zip && zip -ry InBrainSurveys.xcframework.zip InBrainSurveys.xcframework -x '*.DS_Store'",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
@@ -72,7 +73,13 @@
   },
   "files": [
     "android",
+    "!android/.gradle",
+    "!android/.idea",
+    "!android/build",
+    "!android/local.properties",
     "ios",
+    "!ios/InBrainSurveys.xcframework",
+    "!ios/.InBrainSurveys.xcframework.sha256",
     "lib",
     "inbrain-surveys.podspec"
   ]
