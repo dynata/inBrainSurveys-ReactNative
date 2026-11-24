@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [3.4.1](https://github.com/dynata/inBrainSurveys-ReactNative/releases/tag/3.4.1) - 2026-11-24
+
+### Fixed
+- Fixed `pod install` failing on vendored `InBrainSurveys.xcframework` due to npm stripping Mac Catalyst framework symlinks — the framework is now shipped as `ios/InBrainSurveys.xcframework.zip` and extracted during `pod install`
+
 ## [3.4.0](https://github.com/dynata/inBrainSurveys-ReactNative/releases/tag/3.4.0) - 2026-11-23
 
 ### Added

@@ -28,6 +28,7 @@ DerivedData
 *.xcuserstate
 project.xcworkspace
 **/.xcode.env.local
+InBrainSurveys.xcframework
 
 # Android/IntelliJ
 #
